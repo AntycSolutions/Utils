@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% load field_utils %}
+
+{% block title %} - {{ model_name|title }}{% endblock %}
+
+{% include 'navbar.html' %}
+
+{% block content %}
+
+<h1>{{ model_name|title }}</h1>
+{% include 'clients/snippets/messages.html' %}
+<table class="table table-striped table-cover">
+    <thead>
+        <tr>
+            {% for name, field_value in object.get_all_fields.items %}
+                {% if name == "id" %}
+                    <th></th>
+                {% else %}
+                    <th>{{ field_value.field.verbose_name }}</th>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {% for name, field_value in object.get_all_fields.items %}
+                {% if name == "id" %}
+                    <!-- Skip ID -->
+                    <style>
+                        .crud {
+                            width: 75px;
+                        }
+                        .crud-margin {
+                            margin-bottom: 5px;
+                        }
+                    </style>
+                    <td>
+                        <a href="{% url model_name.split|join:'_'|add:'_update' field_value.value %}" class="btn btn-default crud crud-margin">Update</a><br />
+                        <a href="{% url model_name.split|join:'_'|add:'_delete' field_value.value %}" class="btn btn-default crud">Delete</a>
+                    </td>
+                {% elif field_value.field|get_model_field_type|is_image %}
+                    <td>
+                        {% if field_value.value %}
+                            <a href="{{ field_value.value.url }}"><img class="lazy" width="256px" data-src="{% url 'get_thumbnail' 256 256 field_value.value.url|urlencode:"" %}" /></a>
+                        {% else %}
+                            <!-- No Image -->
+                        {% endif %}
+                    </td>
+                {% elif field_value.field|get_model_field_type|is_foreignkey %}
+                    <td>
+                        {% if field_value.value.get_absolute_url %}
+                            <a href="{{ field_value.value.get_absolute_url }}">{{ field_value.value }}</a>
+                        {% else %}
+                            {{ field_value.value }}
+                        {% endif %}
+                    </td>
+                {% else %}
+                    <td>{{ field_value.value }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% if inline_set %}
+        <tr>
+                    <td colspan="2"><ul class="pull-right"><li>{{ inline_model_name|title }}</li></ul></td>
+                    <td colspan="{{ object.get_all_fields.items|length|add:'-2' }}"><!-- -1 for offset, -1 for hidden ID -->
+                        <div class="pull-left">
+                            <table class="table" style="display: inline-block;">
+                                {% for inline in inline_set %}
+                                    {% if forloop.first %}
+                                        <thead>
+                                            <tr>
+                                                {% for name, field_value in inline.get_all_fields.items %}
+                                                    {% if name == "id" %}
+                                                        <!-- Skip ID -->
+                                                    {% elif field_value.value == object %}
+                                                        <!-- Skip object -->
+                                                    {% else %}
+                                                        <th>{{ field_value.field.verbose_name }}</th>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                    {% endif %}
+                                            <tr>
+                                                {% for name, field_value in inline.get_all_fields.items %}
+                                                    {% if name == "id" %}
+                                                        <!-- Skip ID -->
+                                                    {% elif field_value.value == object %}
+                                                        <!-- Skip object -->
+                                                    {% else %}
+                                                        <td>{{ field_value.value }}</td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                    {% if forloop.last %}
+                                        </tbody>
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+<br />
+
+{% endblock %}
+
+{% block scripts %}
+{% include 'utils/snippets/lazy.html' %}
+{% endblock %}

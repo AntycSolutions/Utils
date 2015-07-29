@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %} - {{ model_name_plural|title }}{% endblock %}
+
+{% include 'navbar.html' %}
+
+{% block content %}
+
+<h1>{{ model_name_plural|title }}</h1>
+{% include 'clients/snippets/messages.html' %}
+<div>
+    {% for create in create_list %}
+        <a href="{% url create.model_name.split|join:'_'|add:'_create' %}" class="btn btn-primary">Create {{ create.indefinite_article }} {{ create.model_name|title }}</a>
+    {% empty %}
+        <a href="{% url model_name|add:'_create' %}" class="btn btn-primary">Create {{ indefinite_article }} {{ model_name|title }}</a>
+    {% endfor %}
+</div>
+<br />
+<form method="get">
+    <input type="text" class="input-medium search-query" name="q" placeholder="{{ model_name|title }} Search" value="{{ q }}">
+    {% for name, select in selects.items %}
+        <label for="{{ name }}">{{ select.label }}:</label>
+        <select id="{{ name }}" name="{{ name }}">
+            <option value="">---------</option>
+            {% for option in select.options %}
+                <option value="{{ option.value }}"{% if option.selected %} selected="selected"{% endif %}>
+                    {{ option.value_display }}
+                </option>
+            {% endfor %}
+        </select>
+    {% endfor %}
+    {% if datesearch %}
+        <input type="text" id="dateFromSearchBox" class="input-medium search-query" name="df" placeholder="Date From" value="{{ df }}">
+        <input type="text" id="dateToSearchBox" class="input-medium search-query" name="dt" placeholder="Date To" value="{{ dt }}">
+        <script>
+            $(function() {
+                $( "#dateFromSearchBox" ).datepicker(
+                    {changeMonth: true,
+                     changeYear: true,
+                     yearRange: "1900:2015"});
+                $( "#dateToSearchBox" ).datepicker(
+                    {changeMonth: true,
+                     changeYear: true,
+                     yearRange: "1900:2015"});
+            });
+        </script>
+    {% endif %}
+    <input type="submit" class="btn" value="Search">
+</form>
+{% if object_list %}
+    {% include 'utils/generics/list_table.html' %}
+{% elif q %}
+    <p>There are no {{ model_name_plural|title }} for this search.</p>
+{% else %}
+    <p>There are no {{ model_name_plural|title }} currenty.</p>
+{% endif %}
+{% if is_paginated %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% for name, select in selects.items %}&{{ name }}={% for option in select.options %}{% if option.selected %}{{ option.value }}{% endif %}{% endfor %}{% endfor %}{% if df %}&df={{ df }}{% endif %}{% if dt %}&dt={{ dt }}{% endif %}" class="btn btn-default">Previous</a>
+            {% endif %}
+            {% if page_obj.number %}
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% for name, select in selects.items %}&{{ name }}={% for option in select.options %}{% if option.selected %}{{ option.value }}{% endif %}{% endfor %}{% endfor %}{% if df %}&df={{ df }}{% endif %}{% if dt %}&dt={{ dt }}{% endif %}" class="btn btn-default">Next</a>
+            {% endif %}
+        </span>
+    </div>
+{% endif %}
+<form method="GET" style="display: inline-block;">
+    {% if q %}
+        <input type="hidden" name="q" value="{{ q }}">
+    {% endif %}
+    {% for name, select in selects.items %}
+        {% for option in select.options %}
+            {% if option.selected %}
+                <input type="hidden" name="{{ name }}" value="{{ option.value }}">
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    {% if df %}
+        <input type="hidden" name="df" value="{{ df }}">
+    {% endif %}
+    {% if dt %}
+        <input type="hidden" name="dt" value="{{ dt }}">
+    {% endif %}
+    Rows per Page: <input type="number" id="rows_per_page" name="rows_per_page" value="{{ rows_per_page }}">
+    <input type="submit" class="btn" value="Paginate">
+</form>
+{% if not is_paginated %}<br />{% endif %}
+<br />
+
+{% endblock %}
+
+{% block scripts %}
+{% include 'utils/snippets/lazy.html' %}
+{% endblock %}

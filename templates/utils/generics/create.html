@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load field_utils %}
+
+{% block title %} - Create {{ model_name|title }}{% endblock %}
+
+{% block extrahead %}
+
+<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var prefix = "{{ formset.get_default_prefix }}";
+
+        // Original html value does not match
+        var total_forms = $('#id_' + prefix + '-TOTAL_FORMS');
+        total_forms.val({{ formset.total_form_count }});
+
+        $('#add_form').click(function() {
+            var form_count = $('#id_' + prefix + '-TOTAL_FORMS').val();
+            var form = '{{ formset.empty_form.as_p|escapejs }}';
+            form = form
+                .replace(/__prefix__/g, form_count)
+                .replace(/<p>/g, '')
+                .replace(/<\/p>/g, '');
+            form = form + '<br />';
+            $(form).insertBefore('#add_form');
+            $('#id_' + prefix + '-TOTAL_FORMS').val(parseInt(form_count) + 1);
+        });
+    });
+</script>
+
+{% if autocomplete %}
+    <script src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
+{% endif %}
+
+{% endblock %}
+
+{% include 'navbar.html' %}
+
+{% block content %}
+
+<h1>Create {{ model_name|title }}</h1>
+{% include 'clients/snippets/messages.html' %}
+<form id="create_{{ model_name }}_form" class="form-horizontal" method="post" enctype="{{ form_type }}">
+    <fieldset>
+        {% csrf_token %}
+        <h5>{{ model_name|title }}</h5>
+        {{ form.non_field_errors }}
+        {% for hidden in form.hidden_fields %}
+            {{ hidden.errors }}
+            {{ hidden }}
+        {% endfor %}
+        {% for field in form.visible_fields %}
+            <div class="form-group">
+                {{ field.errors }}
+                <div class="col-lg-10">
+                    {% if field|get_form_field_type|is_date %}
+                        {{ field.label_tag }} {{ field }}
+                        <script>
+                            $(function() {
+                                $("#id_" + "{{ field.name }}").datepicker(
+                                    {changeMonth: true,
+                                     changeYear: true,
+                                     yearRange: "1900:2015"});
+                            });
+                        </script>
+                    {% else %}
+                        {{ field.label_tag }} {{ field }}
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </fieldset>
+    {% if formset %}
+        <fieldset>
+            <h5>{{ inline_model_name|title }}</h5>
+            {{ formset.management_form }}
+            {{ formset.non_form_errors }}
+            {% for form in formset %}
+                {{ form.non_field_errors }}
+                {% for hidden in form.hidden_fields %}
+                    {{ hidden.errors }}
+                    {{ hidden }}
+                {% endfor %}
+                {% for field in form.visible_fields %}
+                    {% if inline %}
+                    <div class="form-group">
+                        {{ field.errors }}
+                        <div class="col-lg-10">
+                            {{ field.label_tag }} {{ field }}
+                        </div>
+                    </div>
+                    {% else %}
+                        {{ field.errors }}
+                        {{ field.label_tag }} {{ field }}
+                    {% endif %}
+                {% endfor %}
+                <br />
+            {% endfor %}
+            <a href="javascript:void(0)" id="add_form" class="btn btn-default" style="margin-top: 15px; margin-bottom: 15px;">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                Add another {{ inline_model_name|title }}
+            </a>
+        </fieldset>
+    {% endif %}
+    <input type="submit" value="Create" />
+</form>
+<br />
+
+{% endblock %}
