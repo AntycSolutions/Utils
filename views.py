@@ -5,6 +5,8 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.generic.edit import UpdateView
+from django.forms.models import modelformset_factory
 
 from utils.search import get_date_query
 
@@ -187,3 +189,40 @@ def _paginate(request, queryset, page_var, rows_per_page):
         queryset = paginator.page(paginator.num_pages)
 
     return queryset
+
+
+class FormsetUpdateView(UpdateView):
+    can_delete = False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if 'form' in context:
+            formset = context.pop('form')
+            context['formset'] = formset
+
+        return context
+
+    def get_object(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        return queryset
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+
+        if 'instance' in kwargs:
+            queryset = kwargs.pop('instance')
+            kwargs['queryset'] = queryset
+
+        return kwargs
+
+    def get_form_class(self):
+        if self.form_class:
+            return self.form_class
+
+        form_class = modelformset_factory(self.model, fields='__all__',
+                                          can_delete=self.can_delete)
+
+        return form_class
