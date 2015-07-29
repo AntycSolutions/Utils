@@ -55,3 +55,21 @@ docs/_build/
 
 # PyBuilder
 target/
+
+
+# Sqlite databases
+db.sqlite3
+
+# Python
+.project
+.pydevproject
+
+# Temporary files
+*~
+
+# Apple
+.DS_Store
+
+# Django
+media/*
+static/*
