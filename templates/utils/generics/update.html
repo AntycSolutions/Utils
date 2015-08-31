@@ -62,7 +62,6 @@
     </script>
 
     {% if autocomplete %}
-        <script src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
         <link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
     {% endif %}
 
@@ -163,4 +162,11 @@
         </div>
     </form>
 
+{% endblock %}
+
+{% block scripts %}
+    {% if autocomplete %}
+        <script src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
+    {% endif %}
 {% endblock %}

@@ -63,7 +63,6 @@
     </script>
 
     {% if autocomplete %}
-        <script src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
         <link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
     {% endif %}
 
@@ -152,16 +151,24 @@
             <div class="col-lg-6">
                 <div class="form-group">
                     <div class="col-lg-9 col-lg-offset-3">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" name="submit">
                             Create
                         </button>
                         <a href="{{ cancel_url }}" class="btn btn-default">
                             Cancel
                         </a>
+                        {{ multistep_btns|safe }}
                     </div>
                 </div>
             </div>
         </div>
     </form>
 
+{% endblock %}
+
+{% block scripts %}
+    {% if autocomplete %}
+        <script src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
+    {% endif %}
 {% endblock %}
