@@ -1,0 +1,46 @@
+{% load field_utils %}
+{% load update_attrs %}
+
+{% now 'Y' as current_year %}
+{{ form.non_field_errors }}
+{% for hidden in form.hidden_fields %}
+    {{ hidden.errors }}
+    {{ hidden }}
+{% endfor %}
+{% for field in form.visible_fields %}
+    <div class="form-group{% if field.errors %} has-error{% endif %}">
+        <label class="col-lg-3 control-label" for="{{ field.auto_id }}">
+            {{ field.label }}
+        </label>
+        <div class="col-lg-9">
+            {% if field|get_form_field_type|is_file %}
+                <div class="btn-file" style="padding: 9px 0px;">
+                    {{ field|update_attrs:"style: display: inline;" }}
+                </div>
+            {% elif field|get_form_field_type|is_checkbox %}
+                <div class="checkbox">
+                    <label>
+                        {{ field }}
+                    </label>
+                </div>
+            {% else %}
+                {{ field|update_attrs:"class: form-control" }}
+            {% endif %}
+            {% if field.errors %}
+                <span class="help-block">
+                    {{ field.errors }}
+                </span>
+            {% endif %}
+        </div>
+        {% if field|get_form_field_type|is_date %}
+            <script>
+                $(function() {
+                    $("#{{ field.id_for_label }}").datepicker(
+                        {changeMonth: true,
+                         changeYear: true,
+                         yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"});
+                });
+            </script>
+        {% endif %}
+    </div>
+{% endfor %}

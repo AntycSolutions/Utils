@@ -33,6 +33,11 @@ def is_autocomplete(type):
 
 
 @register.filter
+def is_checkbox(type):
+    return type in ["CheckboxInput"]
+
+
+@register.filter
 def get_model_field_type(field):
     return field.__class__.__name__
 

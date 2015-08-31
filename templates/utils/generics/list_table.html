@@ -20,17 +20,18 @@
                     {% for name, field_value in object.get_all_fields.items %}
                         {% if field_value.field.name == "id" %}
                             <style>
-                                .crud {
+                                .crud:not(:last-child) {
                                     width: 75px;
-                                }
-                                .crud-margin {
                                     margin-bottom: 5px;
                                 }
+                                .crud:last-child {
+                                    width: 75px;
+                                }
                             </style>
-                            <td>
-                                <a href="{% url model_name|add:'_detail' field_value.value %}"><button type="button" class="btn btn-info crud crud-margin">View</button></a><br />
-                                <a href="{% url model_name|add:'_update' field_value.value %}" class="btn btn-default crud crud-margin">Update</a><br />
-                                <a href="{% url model_name|add:'_delete' field_value.value %}" class="btn btn-default crud">Delete</a>
+                            <td style="width: 91px;"><!-- from computed when width < 91 -->
+                                <a class="btn btn-info crud" href="{% url model_name|add:'_detail' field_value.value %}">View</a><br />
+                                <a href="{% url model_name|add:'_update' field_value.value %}" class="btn btn-default crud">Update</a><br />
+                                <a href="{% url model_name|add:'_delete' field_value.value %}" class="btn btn-danger crud">Delete</a>
                             </td>
                         {% elif field_value.field|get_model_field_type|is_image %}
                             <td>

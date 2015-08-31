@@ -2,112 +2,150 @@
 
 {% load static %}
 {% load field_utils %}
+{% load update_attrs %}
 
 {% block title %} - Create {{ model_name|title }}{% endblock %}
 
 {% block extrahead %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var prefix = "{{ formset.get_default_prefix }}";
 
-<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
-<script src="//code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
-<script type="text/javascript">
-    $(document).ready(function() {
-        var prefix = "{{ formset.get_default_prefix }}";
+            // Original html value does not match
+            var total_forms = $('#id_' + prefix + '-TOTAL_FORMS');
+            total_forms.val({{ formset.total_form_count }});
 
-        // Original html value does not match
-        var total_forms = $('#id_' + prefix + '-TOTAL_FORMS');
-        total_forms.val({{ formset.total_form_count }});
+            var empty_form_prefix = "{{ formset.empty_form.prefix }}";
+            var update_prefix = function(children, prefix) {
+                for (var i = 0; i < children.length; ++i) {
+                    var child = children[i];
+                    var attributes = child.attributes;
+                    for (var k = 0; k < attributes.length; ++k) {
+                        var attribute = attributes[k];
+                        var re = new RegExp(empty_form_prefix);
+                        var value = attribute.value.replace(re, prefix);
+                        attribute.value = value;
+                    }
 
-        $('#add_form').click(function() {
-            var form_count = $('#id_' + prefix + '-TOTAL_FORMS').val();
-            var form = '{{ formset.empty_form.as_p|escapejs }}';
-            form = form
-                .replace(/__prefix__/g, form_count)
-                .replace(/<p>/g, '')
-                .replace(/<\/p>/g, '');
-            form = form + '<br />';
-            $(form).insertBefore('#add_form');
-            $('#id_' + prefix + '-TOTAL_FORMS').val(parseInt(form_count) + 1);
+                    update_prefix(child.children, prefix);
+                }
+            }
+
+            $('#add_form').click(function() {
+                var form_count = $('#id_' + prefix + '-TOTAL_FORMS').val();
+                var form = document.getElementById('{{ inline_model_name }}_empty_form').cloneNode(true);
+                form.removeAttribute('id');
+                form.style.display = '';
+                var children = form.children;
+                var inline_prefix = empty_form_prefix.replace(/__prefix__/,
+                                                              form_count);
+                update_prefix(children, inline_prefix);
+                // one parent is col, second parent is form-group
+                $(form).insertBefore($('#add_form').parent().parent());
+                $('#id_' + prefix + '-TOTAL_FORMS').val(parseInt(form_count) + 1);
+            });
         });
-    });
-</script>
+    </script>
 
-{% if autocomplete %}
-    <script src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
-{% endif %}
+    {% if autocomplete %}
+        <script src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
+    {% endif %}
 
+    <script>
+        $(document).ready(function() {
+            $('<br />').insertBefore('.btn-file input[type=checkbox]');
+            $('.btn-file label').css('margin-bottom', '0px');
+        });
+    </script>
 {% endblock %}
 
 {% include 'navbar.html' %}
 
 {% block content %}
 
-<h1>Create {{ model_name|title }}</h1>
-{% include 'clients/snippets/messages.html' %}
-<form id="create_{{ model_name }}_form" class="form-horizontal" method="post" enctype="{{ form_type }}">
-    <fieldset>
-        {% csrf_token %}
-        <h5>{{ model_name|title }}</h5>
-        {{ form.non_field_errors }}
-        {% for hidden in form.hidden_fields %}
-            {{ hidden.errors }}
-            {{ hidden }}
-        {% endfor %}
-        {% for field in form.visible_fields %}
-            <div class="form-group">
-                {{ field.errors }}
-                <div class="col-lg-10">
-                    {% if field|get_form_field_type|is_date %}
-                        {{ field.label_tag }} {{ field }}
-                        <script>
-                            $(function() {
-                                $("#id_" + "{{ field.name }}").datepicker(
-                                    {changeMonth: true,
-                                     changeYear: true,
-                                     yearRange: "1900:2015"});
-                            });
-                        </script>
-                    {% else %}
-                        {{ field.label_tag }} {{ field }}
-                    {% endif %}
+    <h1>
+        Create {{ model_name|title }}
+    </h1>
+    {% include 'clients/snippets/messages.html' %}
+    <form id="create_{{ model_name }}_form" class="form-horizontal" method="POST" enctype="{{ form_type }}">
+        <div class="row">
+            <fieldset class="col-lg-6">
+                {% csrf_token %}
+                <div class="form-group">
+                    <h5 class="col-lg-3" style="text-align: right;">
+                        {{ model_name|title }}
+                    </h5>
                 </div>
-            </div>
-        {% endfor %}
-    </fieldset>
-    {% if formset %}
-        <fieldset>
-            <h5>{{ inline_model_name|title }}</h5>
-            {{ formset.management_form }}
-            {{ formset.non_form_errors }}
-            {% for form in formset %}
-                {{ form.non_field_errors }}
-                {% for hidden in form.hidden_fields %}
-                    {{ hidden.errors }}
-                    {{ hidden }}
-                {% endfor %}
-                {% for field in form.visible_fields %}
-                    {% if inline %}
+                {% include 'utils/generics/form.html' %}
+            </fieldset>
+            {% if formset %}
+                <fieldset class="col-lg-6">
                     <div class="form-group">
-                        {{ field.errors }}
-                        <div class="col-lg-10">
-                            {{ field.label_tag }} {{ field }}
+                        <h5 class="col-lg-3" style="text-align: right;">
+                            {{ inline_model_name_plural|title }}
+                        </h5>
+                    </div>
+                    {{ formset.management_form }}
+                    {{ formset.non_form_errors }}
+                    {% for form in formset %}
+                        {% if not inline %}
+                            {% include 'utils/generics/form.html' %}
+                            {% if not forloop.last %}
+                                <hr />
+                            {% endif %}
+                        {% else %}
+                            {{ form.non_field_errors }}
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden.errors }}
+                                {{ hidden }}
+                            {% endfor %}
+                            {% for field in form.visible_fields %}
+                                {% if inline %}
+                                <div class="form-group">
+                                    {{ field.errors }}
+                                    <div class="col-lg-10">
+                                        {{ field.label_tag }} {{ field }}
+                                    </div>
+                                </div>
+                                {% else %}
+                                    {{ field.errors }}
+                                    {{ field.label_tag }} {{ field }}
+                                {% endif %}
+                            {% endfor %}
+                            <br />
+                        {% endif %}
+                    {% endfor %}
+                    <div class="form-group">
+                        <div class="col-lg-9 col-lg-offset-3">
+                            <a href="javascript:void(0)" id="add_form" class="btn btn-default">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                Add another {{ inline_model_name|title }}
+                            </a>
                         </div>
                     </div>
-                    {% else %}
-                        {{ field.errors }}
-                        {{ field.label_tag }} {{ field }}
-                    {% endif %}
-                {% endfor %}
-                <br />
-            {% endfor %}
-            <a href="javascript:void(0)" id="add_form" class="btn btn-default" style="margin-top: 15px; margin-bottom: 15px;">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                Add another {{ inline_model_name|title }}
-            </a>
-        </fieldset>
-    {% endif %}
-    <input type="submit" value="Create" />
-</form>
-<br />
+                </fieldset>
+                <div id="{{ inline_model_name }}_empty_form" style="display: none;">
+                    {% include 'utils/generics/form.html' with form=formset.empty_form %}
+                </div>
+            {% else %}
+                <div class="col-lg-6"></div>
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <div class="col-lg-9 col-lg-offset-3">
+                        <button type="submit" class="btn btn-primary">
+                            Create
+                        </button>
+                        <a href="{{ cancel_url }}" class="btn btn-default">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 
 {% endblock %}

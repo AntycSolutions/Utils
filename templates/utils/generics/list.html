@@ -32,16 +32,17 @@
     {% if datesearch %}
         <input type="text" id="dateFromSearchBox" class="input-medium search-query" name="df" placeholder="Date From" value="{{ df }}">
         <input type="text" id="dateToSearchBox" class="input-medium search-query" name="dt" placeholder="Date To" value="{{ dt }}">
+        {% now 'Y' as current_year %}
         <script>
             $(function() {
-                $( "#dateFromSearchBox" ).datepicker(
+                $("#dateFromSearchBox").datepicker(
                     {changeMonth: true,
                      changeYear: true,
-                     yearRange: "1900:2015"});
-                $( "#dateToSearchBox" ).datepicker(
+                     yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"});
+                $("#dateToSearchBox").datepicker(
                     {changeMonth: true,
                      changeYear: true,
-                     yearRange: "1900:2015"});
+                     yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"});
             });
         </script>
     {% endif %}
