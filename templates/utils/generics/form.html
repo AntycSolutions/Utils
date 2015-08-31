@@ -23,6 +23,8 @@
                         {{ field }}
                     </label>
                 </div>
+            {% elif field|get_form_field_type|is_date %}
+                {{ field|update_attrs:"class: form-control datepicker" }}
             {% else %}
                 {{ field|update_attrs:"class: form-control" }}
             {% endif %}
@@ -32,15 +34,5 @@
                 </span>
             {% endif %}
         </div>
-        {% if field|get_form_field_type|is_date %}
-            <script>
-                $(function() {
-                    $("#{{ field.id_for_label }}").datepicker(
-                        {changeMonth: true,
-                         changeYear: true,
-                         yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"});
-                });
-            </script>
-        {% endif %}
     </div>
 {% endfor %}

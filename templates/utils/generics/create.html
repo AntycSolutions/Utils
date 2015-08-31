@@ -40,9 +40,24 @@
                 var inline_prefix = empty_form_prefix.replace(/__prefix__/,
                                                               form_count);
                 update_prefix(children, inline_prefix);
+                dp = $(form).find('.datepicker');
+                // need to apply again, probably because it's cloned
+                dp.removeClass('hasDatepicker');
+                dp.datepicker(
+                    {changeMonth: true,
+                     changeYear: true,
+                     yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"}
+                );
                 // one parent is col, second parent is form-group
                 $(form).insertBefore($('#add_form').parent().parent());
                 $('#id_' + prefix + '-TOTAL_FORMS').val(parseInt(form_count) + 1);
+            });
+
+            $(function() {
+                $(".datepicker").datepicker(
+                    {changeMonth: true,
+                     changeYear: true,
+                     yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"});
             });
         });
     </script>
@@ -126,6 +141,7 @@
                     </div>
                 </fieldset>
                 <div id="{{ inline_model_name }}_empty_form" style="display: none;">
+                    <hr />
                     {% include 'utils/generics/form.html' with form=formset.empty_form %}
                 </div>
             {% else %}
