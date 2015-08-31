@@ -15,6 +15,9 @@ def update_attrs(field, new_attrs):
             attrs[d] = True  # support html5 attrs
         else:
             t, v = d.split(':', 1)  # supports style: width: 100px;
-            attrs[t] = "{0} {1}".format(attrs[t], v.strip())
+            if t in attrs:
+                attrs[t] = "{0} {1}".format(attrs[t], v.strip())
+            else:
+                attrs[t] = v.strip()
 
     return field.as_widget(attrs=attrs)
