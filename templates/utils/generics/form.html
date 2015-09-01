@@ -1,7 +1,6 @@
 {% load field_utils %}
 {% load update_attrs %}
 
-{% now 'Y' as current_year %}
 {{ form.non_field_errors }}
 {% for hidden in form.hidden_fields %}
     {{ hidden.errors }}

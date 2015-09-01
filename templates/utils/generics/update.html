@@ -5,7 +5,8 @@
 
 {% block title %} - Update {{ model_name|title }}{% endblock %}
 
-{% block extrahead %}
+{% block extra_head %}
+    {% now 'Y' as current_year %}
     <script type="text/javascript">
         $(document).ready(function() {
             var prefix = "{{ formset.get_default_prefix }}";
