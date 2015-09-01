@@ -87,9 +87,11 @@
             <fieldset class="col-lg-6">
                 {% csrf_token %}
                 <div class="form-group">
-                    <h5 class="col-lg-3" style="text-align: right;">
-                        {{ model_name|title }}
-                    </h5>
+                    <label class="col-lg-3 control-label">
+                        <h5>
+                            {{ model_name|title }}
+                        </h5>
+                    </label>
                 </div>
                 {% include 'utils/generics/form.html' %}
             </fieldset>
