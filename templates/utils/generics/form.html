@@ -27,6 +27,11 @@
             {% else %}
                 {{ field|update_attrs:"class: form-control" }}
             {% endif %}
+            {% if field.help_text %}
+                <span class="help-block">
+                    {{ field.help_text }}
+                </span>
+            {% endif %}
             {% if field.errors %}
                 <span class="help-block">
                     {{ field.errors }}
