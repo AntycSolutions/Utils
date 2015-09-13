@@ -29,12 +29,21 @@ def _get_exif(filename):
     #             orientation = v
 
     try:
-        zeroth_ifd, exif_ifd, gps_ifd = piexif.load(filename)
+        exif_dict = piexif.load(filename)
 
-        if piexif.ZerothIFD.Orientation in zeroth_ifd:
-            orientation = zeroth_ifd.pop(piexif.ZerothIFD.Orientation)
-            exif_bytes = piexif.dump(zeroth_ifd, exif_ifd, gps_ifd)
-    except:
+        zeroth = '0th'
+        exif = 'Exif'
+        gps = 'GPS'
+
+        zeroth_ifd = exif_dict[zeroth]
+        exif_ifd = exif_dict[exif]
+        gps_ifd = exif_dict[gps]
+
+        if piexif.ImageIFD.Orientation in zeroth_ifd:
+            orientation = zeroth_ifd.pop(piexif.ImageIFD.Orientation)
+            new_exif_dict = {zeroth: zeroth_ifd, exif: exif_ifd, gps: gps_ifd}
+            exif_bytes = piexif.dump(new_exif_dict)
+    except ValueError:  # Given file is niether JPEG nor TIFF.
         orientation = None
         exif_bytes = None
 
