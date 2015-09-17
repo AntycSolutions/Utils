@@ -10,19 +10,25 @@
     {% include 'clients/snippets/messages.html' %}
     <div>
         {% for create in create_list %}
-            <a href="{% url create.model_name.split|join:'_'|add:'_create' %}" class="btn btn-primary">Create {{ create.indefinite_article }} {{ create.model_name|title }}</a>
+            <a href="{% url create.model_name.split|join:'_'|add:'_create' %}" class="btn btn-primary">
+                Create {{ create.indefinite_article }} {{ create.model_name|title }}
+            </a>
         {% empty %}
-            <a href="{% url model_name|add:'_create' %}" class="btn btn-primary">Create {{ indefinite_article }} {{ model_name|title }}</a>
+            <a href="{% url model_name|add:'_create' %}" class="btn btn-primary">
+                Create {{ indefinite_article }} {{ model_name|title }}
+            </a>
         {% endfor %}
     </div>
     <br />
     <form method="GET" class="form-inline">
         <div class="form-group">
-            <input type="text" class="form-control search-query" name="q" placeholder="{{ model_name|title }} Search" value="{{ q }}">
+            <input type="text" class="form-control search-query" name="q" placeholder="{{ model_name|title }} Search" value="{{ q }}" />
         </div>
         {% for name, select in selects.items %}
             <div class="form-group">
-                <label for="{{ name }}" class="control-label">{{ select.label }}:</label>
+                <label for="{{ name }}" class="control-label">
+                    {{ select.label }}:
+                </label>
                 <select id="{{ name }}" name="{{ name }}" class="form-control">
                     <option value="">---------</option>
                     {% for option in select.options %}
@@ -35,10 +41,10 @@
         {% endfor %}
         {% if datesearch %}
             <div class="form-group">
-                <input type="text" id="dateFromSearchBox" class="form-control search-query" name="df" placeholder="Date From" value="{{ df }}">
+                <input type="text" id="dateFromSearchBox" class="form-control search-query" name="df" placeholder="Date From" value="{{ df }}" />
             </div>
             <div class="form-group">
-                <input type="text" id="dateToSearchBox" class="form-control search-query" name="dt" placeholder="Date To" value="{{ dt }}">
+                <input type="text" id="dateToSearchBox" class="form-control search-query" name="dt" placeholder="Date To" value="{{ dt }}" />
             </div>
             {% now 'Y' as current_year %}
             <script>
@@ -61,53 +67,64 @@
     {% if object_list %}
         {% include 'utils/generics/list_table.html' %}
     {% elif q %}
-        <p>There are no {{ model_name_plural|title }} for this search.</p>
+        <p>
+            There are no {{ model_name_plural|title }} for this search.
+        </p>
     {% else %}
-        <p>There are no {{ model_name_plural|title }} currenty.</p>
+        <p>
+            There are no {{ model_name_plural|title }} currenty.
+        </p>
     {% endif %}
     {% if is_paginated %}
         <div class="pagination">
             <span class="step-links">
                 {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% for name, select in selects.items %}&{{ name }}={% for option in select.options %}{% if option.selected %}{{ option.value }}{% endif %}{% endfor %}{% endfor %}{% if df %}&df={{ df }}{% endif %}{% if dt %}&dt={{ dt }}{% endif %}" class="btn btn-default">Previous</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% for name, select in selects.items %}&{{ name }}={% for option in select.options %}{% if option.selected %}{{ option.value }}{% endif %}{% endfor %}{% endfor %}{% if df %}&df={{ df }}{% endif %}{% if dt %}&dt={{ dt }}{% endif %}" class="btn btn-default">
+                        Previous
+                    </a>
                 {% endif %}
                 <span class="current">
                     Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
                 </span>
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% for name, select in selects.items %}&{{ name }}={% for option in select.options %}{% if option.selected %}{{ option.value }}{% endif %}{% endfor %}{% endfor %}{% if df %}&df={{ df }}{% endif %}{% if dt %}&dt={{ dt }}{% endif %}" class="btn btn-default">Next</a>
+                    <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% for name, select in selects.items %}&{{ name }}={% for option in select.options %}{% if option.selected %}{{ option.value }}{% endif %}{% endfor %}{% endfor %}{% if df %}&df={{ df }}{% endif %}{% if dt %}&dt={{ dt }}{% endif %}" class="btn btn-default">
+                        Next
+                    </a>
                 {% endif %}
             </span>
         </div>
     {% endif %}
     <form method="GET" class="form-inline" style="display: inline-block;">
         {% if q %}
-            <input type="hidden" name="q" value="{{ q }}">
+            <input type="hidden" name="q" value="{{ q }}" />
         {% endif %}
         {% for name, select in selects.items %}
             {% for option in select.options %}
                 {% if option.selected %}
-                    <input type="hidden" name="{{ name }}" value="{{ option.value }}">
+                    <input type="hidden" name="{{ name }}" value="{{ option.value }}" />
                 {% endif %}
             {% endfor %}
         {% endfor %}
         {% if df %}
-            <input type="hidden" name="df" value="{{ df }}">
+            <input type="hidden" name="df" value="{{ df }}" />
         {% endif %}
         {% if dt %}
-            <input type="hidden" name="dt" value="{{ dt }}">
+            <input type="hidden" name="dt" value="{{ dt }}" />
         {% endif %}
         <div class="form-group">
-            Rows per Page:
-            <input type="number" id="rows_per_page" name="rows_per_page" class="form-control" value="{{ rows_per_page }}">
+            Rows per Page: <input type="number" id="rows_per_page" name="rows_per_page" class="form-control" value="{{ rows_per_page }}" />
         </div>
-        <button type="submit" class="btn">Paginate</button>
+        <button type="submit" class="btn">
+            Paginate
+        </button>
     </form>
-    {% if not is_paginated %}<br />{% endif %}
+    {% if not is_paginated %}
+        <br />
+    {% endif %}
     <br />
 
 {% endblock %}
 
 {% block extra_scripts %}
-{% include 'utils/snippets/lazy.html' %}
+    {% include 'utils/snippets/lazy.html' %}
 {% endblock %}
