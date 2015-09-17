@@ -1,6 +1,6 @@
 {% load field_utils %}
 
-<table class="table table-striped table-cover">
+<table class="table table-striped">
     {% for object in object_list %}
         {% if forloop.first %}
             <thead>
@@ -9,11 +9,14 @@
                         {% if name == "id" %}
                             <th></th>
                         {% else %}
-                            <th>{{ field_value.field.verbose_name }}</th>
+                            <th>
+                                {{ field_value.field.verbose_name }}
+                            </th>
                         {% endif %}
                     {% endfor %}
                 </tr>
             </thead>
+            <!-- strange formatting is intentional -->
             <tbody>
         {% endif %}
                 <tr>
@@ -29,14 +32,24 @@
                                 }
                             </style>
                             <td style="width: 91px;"><!-- from computed when width < 91 -->
-                                <a class="btn btn-info crud" href="{% url model_name|add:'_detail' field_value.value %}">View</a><br />
-                                <a href="{% url model_name|add:'_update' field_value.value %}" class="btn btn-default crud">Update</a><br />
-                                <a href="{% url model_name|add:'_delete' field_value.value %}" class="btn btn-danger crud">Delete</a>
+                                <a class="btn btn-info crud" href="{% url model_name|add:'_detail' field_value.value %}">
+                                    View
+                                </a>
+                                <br />
+                                <a href="{% url model_name|add:'_update' field_value.value %}" class="btn btn-default crud">
+                                    Update
+                                </a>
+                                <br />
+                                <a href="{% url model_name|add:'_delete' field_value.value %}" class="btn btn-danger crud">
+                                    Delete
+                                </a>
                             </td>
                         {% elif field_value.field|get_model_field_type|is_image %}
                             <td>
                                 {% if field_value.value %}
-                                    <a href="{{ field_value.value.url }}"><img class="lazy" width="128px" data-src="{% url 'get_thumbnail' 128 128 field_value.value.url|urlencode:"" %}" /></a>
+                                    <a href="{{ field_value.value.url }}">
+                                        <img class="lazy" width="128px" data-src="{% url 'get_thumbnail' 128 128 field_value.value.url|urlencode:"" %}" />
+                                    </a>
                                 {% else %}
                                     <!-- No Image -->
                                 {% endif %}
@@ -44,13 +57,21 @@
                         {% elif field_value.field|get_model_field_type|is_foreignkey %}
                             <td>
                                 {% if field_value.value.get_absolute_url %}
-                                    <a href="{{ field_value.value.get_absolute_url }}">{{ field_value.value }}</a>
+                                    <a href="{{ field_value.value.get_absolute_url }}">
+                                        {{ field_value.value }}
+                                    </a>
                                 {% else %}
                                     {{ field_value.value }}
                                 {% endif %}
                             </td>
+                        {% elif name in object.money_fields %}
+                            <td>
+                                ${{ field_value.value }}
+                            </td>
                         {% else %}
-                            <td>{{ field_value.value }}</td>
+                            <td>
+                                {{ field_value.value }}
+                            </td>
                         {% endif %}
                     {% endfor %}
                 </tr>
