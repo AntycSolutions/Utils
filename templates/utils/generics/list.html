@@ -7,7 +7,7 @@
 {% block content %}
 
     <h1>{{ model_name_plural|title }}</h1>
-    {% include 'clients/snippets/messages.html' %}
+    {% include 'utils/snippets/messages.html' %}
     <div>
         {% for create in create_list %}
             <a href="{% url create.model_name.split|join:'_'|add:'_create' %}" class="btn btn-primary">
