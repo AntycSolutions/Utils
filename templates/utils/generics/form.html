@@ -9,7 +9,7 @@
 {% for field in form.visible_fields %}
     <div class="form-group{% if field.errors %} has-error{% endif %}">
         <label class="col-lg-3 control-label" for="{{ field.auto_id }}">
-            {{ field.label }}
+            {{ field.label }}{% if field.field.required %}*{% endif %}
         </label>
         <div class="col-lg-9">
             {% if field|get_form_field_type|is_file %}
