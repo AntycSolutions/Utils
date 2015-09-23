@@ -2,13 +2,9 @@ import os
 import urllib
 
 from django.conf import settings
-from django.http import HttpResponse
-from django.contrib import messages
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.views.generic.edit import UpdateView
-from django.forms.models import modelformset_factory
-
-from utils.search import get_date_query
+from django import http
+from django.views.generic import edit
+from django.forms import models
 
 
 def _get_exif(filename):
@@ -115,92 +111,12 @@ def get_thumbnail(request, width, height, url):
     path = os.path.join(media_root, partial_path)
     thumbnail = _rescale(path, width, height, force=False)
 
-    response = HttpResponse(thumbnail, 'image/jpeg')
+    response = http.HttpResponse(thumbnail, 'image/jpeg')
+
     return response
 
 
-def _date_search(request, fields, model, queryset=None):
-    if not queryset:
-        queryset = model.objects.all()
-
-    if (('df' in request.GET) and request.GET['df'].strip()
-            and ('dt' in request.GET)
-            and request.GET['dt'].strip()):
-        query_date_from_string = request.GET['df']
-        query_date_to_string = request.GET['dt']
-        date_query = get_date_query(
-            query_date_from_string, query_date_to_string, fields
-        )
-        if date_query:
-            if queryset:
-                queryset = queryset.filter(date_query)
-            else:
-                queryset = model.objects.filter(date_query)
-        else:
-            messages.add_message(
-                request, messages.WARNING,
-                "Invalid date. Please use MM/DD/YYYY."
-            )
-    elif ('df' in request.GET) and request.GET['df'].strip():
-        query_date_from_string = request.GET['df']
-        date_query = get_date_query(
-            query_date_from_string, None, fields
-        )
-        if date_query:
-            if queryset:
-                queryset = queryset.filter(date_query)
-            else:
-                queryset = model.objects.filter(date_query)
-        else:
-            messages.add_message(
-                request, messages.WARNING,
-                "Invalid date. Please use MM/DD/YYYY."
-            )
-    elif ('dt' in request.GET) and request.GET['dt'].strip():
-        query_date_to_string = request.GET['dt']
-        date_query = get_date_query(
-            None, query_date_to_string, fields
-        )
-        if date_query:
-            if queryset:
-                queryset = queryset.filter(date_query)
-            else:
-                queryset = model.objects.filter(date_query)
-        else:
-            messages.add_message(
-                request, messages.WARNING,
-                "Invalid date. Please use MM/DD/YYYY."
-            )
-
-    return queryset
-
-
-def _get_paginate_by(request, rows_per_page_var):
-    paginate_by = 5
-    if request.session.get(rows_per_page_var, False):
-        paginate_by = request.session[rows_per_page_var]
-    if (rows_per_page_var in request.GET
-            and request.GET[rows_per_page_var].strip()):
-        paginate_by = request.GET[rows_per_page_var]
-        request.session[rows_per_page_var] = paginate_by
-
-    return paginate_by
-
-
-def _paginate(request, queryset, page_var, rows_per_page):
-    page = request.GET.get(page_var)
-    paginator = Paginator(queryset, rows_per_page)
-    try:
-        queryset = paginator.page(page)
-    except PageNotAnInteger:
-        queryset = paginator.page(1)
-    except EmptyPage:
-        queryset = paginator.page(paginator.num_pages)
-
-    return queryset
-
-
-class FormsetUpdateView(UpdateView):
+class FormsetUpdateView(edit.UpdateView):
     can_delete = False
 
     def get_context_data(self, **kwargs):
@@ -231,7 +147,74 @@ class FormsetUpdateView(UpdateView):
         if self.form_class:
             return self.form_class
 
-        form_class = modelformset_factory(self.model, fields='__all__',
-                                          can_delete=self.can_delete)
+        form_class = models.modelformset_factory(self.model, fields='__all__',
+                                                 can_delete=self.can_delete)
 
         return form_class
+
+
+class InlineFormsetCreateView(edit.CreateView):
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+        form = self.get_form()
+        formset = self.inline_formset()
+
+        return self.render_to_response(
+            self.get_context_data(form=form, formset=formset)
+        )
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        form = self.get_form()
+        formset = self.inline_formset(self.request.POST)
+
+        if form.is_valid() and formset.is_valid():
+            return self.form_valid(form, formset)
+        else:
+            return self.form_invalid(form, formset)
+
+    def form_valid(self, form, formset):
+        self.object = form.save()
+        formset.instance = self.object
+        formset.save()
+
+        return http.HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form, formset):
+        return self.render_to_response(
+            self.get_context_data(form=form, formset=formset)
+        )
+
+
+class InlineFormsetUpdateView(edit.UpdateView):
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        formset = self.inline_formset(instance=self.object)
+
+        return self.render_to_response(
+            self.get_context_data(form=form, formset=formset)
+        )
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        formset = self.inline_formset(self.request.POST, instance=self.object)
+
+        if form.is_valid() and formset.is_valid():
+            return self.form_valid(form, formset)
+        else:
+            return self.form_invalid(form, formset)
+
+    def form_valid(self, form, formset):
+        self.object = form.save()
+        formset.save()
+
+        return http.HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form, formset):
+        return self.render_to_response(
+            self.get_context_data(form=form, formset=formset)
+        )
