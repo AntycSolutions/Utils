@@ -1,0 +1,29 @@
+{% load field_utils %}
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        {% for object in object_list %}
+            {% if forloop.first %}
+                <thead>
+                    <tr>
+                        <th>
+                            {{ model_name|title }}
+                        </th>
+                    </tr>
+                </thead>
+                <!-- strange formatting is intentional -->
+                <tbody>
+            {% endif %}
+                    <tr>
+                        <td>
+                            <a href="{{ object.get_absolute_url }}">
+                                {{ object }}
+                            </a>
+                        </td>
+                    </tr>
+            {% if forloop.last %}
+                </tbody>
+            {% endif %}
+        {% endfor %}
+    </table>
+</div>
