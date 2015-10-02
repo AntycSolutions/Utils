@@ -55,3 +55,8 @@ def is_foreignkey(type):
 @register.filter
 def is_fileset(type):
     return type in ["PseudoFileSet"]
+
+
+@register.filter
+def is_textfield(type):
+    return type in ["TextField"]
