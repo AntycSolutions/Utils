@@ -1,116 +1,130 @@
 {% load field_utils %}
 
-<table class="table table-striped">
-    {% for object in object_list %}
-        {% if forloop.first %}
-            <thead>
-                <tr>
-                    {% for name, field_value in object.get_all_fields.items %}
-                        {% if name == "id" %}
-                            <th></th>
-                        {% else %}
-                            <th>
-                                {{ field_value.field.verbose_name }}
-                            </th>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-            </thead>
-            <!-- strange formatting is intentional -->
-            <tbody>
-        {% endif %}
-                <tr>
-                    {% for name, field_value in object.get_all_fields.items %}
-                        {% if field_value.field.name == "id" %}
-                            <style>
-                                .crud:not(:last-child) {
-                                    width: 75px;
-                                    margin-bottom: 5px;
-                                }
-                                .crud:last-child {
-                                    width: 75px;
-                                }
-                            </style>
-                            <td style="width: 91px;"><!-- from computed when width < 91 -->
-                                <a class="btn btn-info crud" href="{% url model_name|add:'_detail' field_value.value %}">
-                                    View
-                                </a>
-                                <br />
-                                <a href="{% url model_name|add:'_update' field_value.value %}" class="btn btn-default crud">
-                                    Update
-                                </a>
-                                <br />
-                                <a href="{% url model_name|add:'_delete' field_value.value %}" class="btn btn-danger crud">
-                                    Delete
-                                </a>
-                            </td>
-                        {% elif field_value.field|get_model_field_type|is_image %}
-                            <td>
-                                {% if field_value.value %}
-                                    <a href="{{ field_value.value.url }}">
-                                        <img class="lazy" width="128px" data-src="{% url 'get_thumbnail' 128 128 field_value.value.url|urlencode:"" %}" />
+<div class="table-responsive">
+    <table class="table table-striped">
+        {% for object in object_list %}
+            {% if forloop.first %}
+                <thead>
+                    <tr>
+                        {% for name, field_value in object.get_all_fields.items %}
+                            {% if name in hidden_fields %}
+                                <!-- empty -->
+                            {% elif name == "id" %}
+                                <th></th>
+                            {% elif field_value.field|get_model_field_type|is_textfield %}
+                                <th style="width: 30%;">
+                                    {{ field_value.field.verbose_name }}
+                                </th>
+                            {% else %}
+                                <th>
+                                    {{ field_value.field.verbose_name }}
+                                </th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <!-- strange formatting is intentional -->
+                <tbody>
+            {% endif %}
+                    <tr>
+                        {% for name, field_value in object.get_all_fields.items %}
+                            {% if name in hidden_fields %}
+                                <!-- empty -->
+                            {% elif field_value.field.name == "id" %}
+                                <style>
+                                    .crud:not(:last-child) {
+                                        width: 75px;
+                                        margin-bottom: 5px;
+                                    }
+                                    .crud:last-child {
+                                        width: 75px;
+                                    }
+                                </style>
+                                <td style="width: 91px;"><!-- from computed when width < 91 -->
+                                    <a class="btn btn-info crud" href="{% url model_name|add:'_detail' field_value.value %}">
+                                        View
                                     </a>
-                                {% else %}
-                                    <!-- No Image -->
-                                {% endif %}
-                            </td>
-                        {% elif field_value.field|get_model_field_type|is_foreignkey %}
-                            <td>
-                                {% if field_value.value.get_absolute_url %}
-                                    <a href="{{ field_value.value.get_absolute_url }}">
+                                    <br />
+                                    <a href="{% url model_name|add:'_update' field_value.value %}" class="btn btn-default crud">
+                                        Update
+                                    </a>
+                                    <br />
+                                    <a href="{% url model_name|add:'_delete' field_value.value %}" class="btn btn-danger crud">
+                                        Delete
+                                    </a>
+                                </td>
+                            {% elif field_value.field|get_model_field_type|is_image %}
+                                <td>
+                                    {% if field_value.value %}
+                                        <a href="{{ field_value.value.url }}">
+                                            <img class="lazy" width="128px" data-src="{% url 'get_thumbnail' 128 128 field_value.value.url|urlencode:"" %}" />
+                                        </a>
+                                    {% else %}
+                                        <!-- No Image -->
+                                    {% endif %}
+                                </td>
+                            {% elif field_value.field|get_model_field_type|is_foreignkey %}
+                                <td>
+                                    {% if field_value.value.get_absolute_url %}
+                                        <a href="{{ field_value.value.get_absolute_url }}">
+                                            {{ field_value.value }}
+                                        </a>
+                                    {% else %}
                                         {{ field_value.value }}
-                                    </a>
-                                {% else %}
+                                    {% endif %}
+                                </td>
+                            {% elif field_value.field|get_model_field_type|is_textfield %}
+                                <td style="widtH: 30%;">
                                     {{ field_value.value }}
-                                {% endif %}
-                            </td>
-                        {% elif name in object.money_fields %}
-                            <td>
-                                ${{ field_value.value }}
-                            </td>
-                        {% else %}
-                            <td>
-                                {{ field_value.value }}
-                            </td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                {# incomplete #}
-                {% comment %}
-                {% if object.get_inline %}
-                    {% with inline=object.get_inline %}
-                        <tr>
-                            <td><ul class="pull-right"><li>{{ inline.name }}</li></ul></td>
-                            <td>
-                                <div class="pull-left">
-                                    <table class="table" style="display: inline-block;">
-                                        {% if forloop.first %}
-                                            <thead>
+                                </td>
+                            {% elif name in object.money_fields %}
+                                <td>
+                                    ${{ field_value.value }}
+                                </td>
+                            {% else %}
+                                <td>
+                                    {{ field_value.value }}
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {# incomplete #}
+                    {% comment %}
+                    {% if object.get_inline %}
+                        {% with inline=object.get_inline %}
+                            <tr>
+                                <td><ul class="pull-right"><li>{{ inline.name }}</li></ul></td>
+                                <td>
+                                    <div class="pull-left">
+                                        <table class="table" style="display: inline-block;">
+                                            {% if forloop.first %}
+                                                <thead>
+                                                    <tr>
+                                                        {% for name, field_value in inline.get_all_fields.items %}
+                                                            {% if name == "id" %}
+                                                                <th></th>
+                                                            {% else %}
+                                                                <th>{{ field_value.field.verbose_name }}</th>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                            {% endif %}
+                                            <tbody>
                                                 <tr>
-                                                    {% for name, field_value in inline.get_all_fields.items %}
-                                                        {% if name == "id" %}
-                                                            <th></th>
-                                                        {% else %}
-                                                            <th>{{ field_value.field.verbose_name }}</th>
-                                                        {% endif %}
-                                                    {% endfor %}
+                                                    <td></td>
                                                 </tr>
-                                            </thead>
-                                        {% endif %}
-                                        <tbody>
-                                            <tr>
-                                                <td></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endwith %}
-                {% endif %}
-                {% endcomment %}
-        {% if forloop.last %}
-            </tbody>
-        {% endif %}
-    {% endfor %}
-</table>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endwith %}
+                    {% endif %}
+                    {% endcomment %}
+            {% if forloop.last %}
+                </tbody>
+            {% endif %}
+        {% endfor %}
+    </table>
+</div>
