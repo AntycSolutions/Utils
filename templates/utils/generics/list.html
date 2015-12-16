@@ -10,7 +10,7 @@
     {% include 'utils/snippets/messages.html' %}
     <div>
         {% for create in create_list %}
-            <a href="{% url create.model_name.split|join:'_'|add:'_create' %}" class="btn btn-primary">
+            <a href="{{ create.url }}" class="btn btn-primary">
                 Create {{ create.indefinite_article }} {{ create.model_name|title }}
             </a>
         {% empty %}
@@ -21,9 +21,11 @@
     </div>
     <br />
     <form method="GET" class="form-inline">
-        <div class="form-group">
-            <input type="text" class="form-control search-query" name="q" placeholder="{{ model_name|title }} Search" value="{{ q }}" />
-        </div>
+        {% if search %}
+            <div class="form-group">
+                <input type="text" class="form-control search-query" name="q" placeholder="{{ model_name|title }} Search" value="{{ q }}" />
+            </div>
+        {% endif %}
         {% for name, select in selects.items %}
             <div class="form-group">
                 <label for="{{ name }}" class="control-label">
@@ -60,9 +62,11 @@
                 });
             </script>
         {% endif %}
-        <button type="submit" class="btn">
-            Search
-        </button>
+        {% if search or datesearch or selects %}
+            <button type="submit" class="btn">
+                Search
+            </button>
+        {% endif %}
     </form>
     {% if object_list %}
         {% include 'utils/generics/list_table.html' %}
