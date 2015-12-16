@@ -13,11 +13,11 @@
                                 <th></th>
                             {% elif field_value.field|get_model_field_type|is_textfield %}
                                 <th style="width: 30%;">
-                                    {{ field_value.field.verbose_name }}
+                                    {{ field_value.field.verbose_name|capfirst }}
                                 </th>
                             {% else %}
                                 <th>
-                                    {{ field_value.field.verbose_name }}
+                                    {{ field_value.field.verbose_name|capfirst }}
                                 </th>
                             {% endif %}
                         {% endfor %}
