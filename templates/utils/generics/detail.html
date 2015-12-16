@@ -173,6 +173,17 @@
                 </div>
             </div>
         </div>
+        {% if footer_buttons %}
+            <div class="panel-footer">
+                <div class="btn-group">
+                    {% for button in footer_buttons %}
+                        <a href="{{ button.url }}" class="btn btn-default">
+                            {{ button.text }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
     </div>
 
 {% endblock %}
