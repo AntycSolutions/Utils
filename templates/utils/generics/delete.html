@@ -6,35 +6,35 @@
 
 {% block content %}
 
-<h1>
-    Delete {{ model_name|title }}
-</h1>
-{% include 'utils/snippets/messages.html' %}
-<form method="POST" class="form-horizontal">
-    {% csrf_token %}
-    <div class="row">
-        <fieldset class="col-lg-6">
-            <div class="form-group">
-                <p class="col-lg-12">
-                    Are you sure you want to delete "{{ object }}"?
-                </p>
-            </div>
-        </fieldset>
-    </div>
-    <div class="row">
-            <div class="col-lg-6">
+    <h1>
+        Delete {{ model_name|title }}
+    </h1>
+    {% include 'utils/snippets/messages.html' %}
+    <form method="POST" class="form-horizontal">
+        {% csrf_token %}
+        <div class="row">
+            <fieldset class="col-lg-6">
                 <div class="form-group">
-                    <div class="col-lg-12">
-                        <button type="submit" class="btn btn-danger" name="submit">
-                            Confirm
-                        </button>
-                        <a href="{{ cancel_url }}" class="btn btn-default">
-                            Cancel
-                        </a>
+                    <p class="col-lg-12">
+                        Are you sure you want to delete "{{ object }}"?
+                    </p>
+                </div>
+            </fieldset>
+        </div>
+        <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <div class="col-lg-12">
+                            <button type="submit" class="btn btn-danger" name="submit">
+                                Confirm
+                            </button>
+                            <a href="{{ cancel_url }}" class="btn btn-default">
+                                Cancel
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-</form>
+    </form>
 
 {% endblock %}

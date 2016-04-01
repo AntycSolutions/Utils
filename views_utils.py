@@ -1,3 +1,4 @@
+from django import shortcuts
 from django.contrib import messages
 from django.core import paginator
 
@@ -83,3 +84,43 @@ def _paginate(request, queryset, page_var, rows_per_page):
         queryset = queryset_paginator.page(queryset_paginator.num_pages)
 
     return queryset
+
+
+class PermissionMixin:
+    permissions = None
+
+    def dispatch(self, *args, **kwargs):
+        redirect = self.check_permissions()
+        if redirect:
+            # permission denied
+            return redirect
+        else:
+            return super().dispatch(*args, **kwargs)
+
+    def check_permissions(self):
+        user = self.request.user
+
+        permissions = self.get_permissions()
+
+        if isinstance(permissions, dict):
+            permissions = [permissions]
+
+        for perm_dict in permissions:
+            if not user.has_perm(perm_dict['permission']):
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    perm_dict.get('message', "Permission denied.")
+                )
+
+                return shortcuts.redirect(perm_dict.get('redirect', '/'))
+
+    def get_permissions(self):
+        if self.permissions is None:
+            raise Exception(
+                '{class_name} is missing the permissions attribute.'
+                ' Define {class_name}.permissions or override'
+                ' {0}.get_permissions().'.format(self.__class__.__name__)
+            )
+
+        return self.permissions

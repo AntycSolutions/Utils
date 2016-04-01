@@ -7,3 +7,8 @@ register = template.Library()
 @register.filter()
 def nbsp(value):
     return mark_safe("&nbsp;".join(value.split(' ')))
+
+
+@register.filter()
+def nbsp_double(value):
+    return mark_safe(" &nbsp;".join(value.split('  ')))

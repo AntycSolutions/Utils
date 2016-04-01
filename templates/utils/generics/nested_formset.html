@@ -1,0 +1,120 @@
+{% load crispy_forms_tags %}
+{% load formset_tags %}
+
+<fieldset>
+    <legend>
+        {# TODO: proper plural via minimum_name_plural #}
+        {{ nested_formset.minimum_name }}s
+    </legend>
+    <div id="nested-formset{{ nested_formset.prefix }}" data-formset-prefix="{{ nested_formset.prefix }}">
+        {{ nested_formset.management_form }}
+
+        <div data-formset-body-{{ nested_formset.prefix }}>
+            {# {{ nested_formset.prefix }} #}
+            {% for inline_form in nested_formset %}
+                <div data-formset-form-{{ nested_formset.prefix }}>
+                    {# {{ inline_form.prefix }} #}
+                    {{ inline_form|crispy }}
+                    <div class="form-group">
+                        <button type="button" class="btn btn-danger" data-formset-delete-button-{{ nested_formset.prefix }}>
+                            Delete {{ nested_formset.minimum_name }}
+                        </button>
+                    </div>
+                </div>
+
+                    {% if inline_form.nested %}
+                        <div>
+                            <button type="button" onclick="fade($(this).parent(), '#container_{{ inline_form.nested.prefix }}');" class="btn btn-default" style="display: block; float: right;">
+                                Add {{ inline_form.nested.minimum_name }}s
+                            </button>
+                            <div style="clear: both;"></div>
+                        </div>
+                        <div id="container_{{ inline_form.nested.prefix }}" style="margin-left: 30px; display: none;">
+                            {% include 'tender/nested_formset.html' with nested_formset=inline_form.nested %}
+                        </div>
+                    {% endif %}
+
+                <hr />
+            {% endfor %}
+        </div>
+
+        <script type="form-template" data-formset-empty-form-{{ nested_formset.prefix }}>
+            {% escapescript %}
+                <div data-formset-form-{{ nested_formset.prefix }}>
+                    <div>
+                        {#{ nested_formset.prefix }}#}
+                    </div>
+                    {#{{ nested_formset.empty_form.prefix }}#}
+                    {{ nested_formset.empty_form|crispy }}
+                    <div class="form-group">
+                        <button type="button" class="btn btn-danger" data-formset-delete-button-{{ nested_formset.prefix }}>
+                            Delete {{ nested_formset.minimum_name }}
+                        </button>
+                    </div>
+                    {% if nested_formset.empty_form.nested %}
+                        <div>
+                            <button type="button" onclick="fade($(this).parent(), '#container_{{ nested_formset.empty_form.nested.prefix }}');" class="btn btn-default" style="display: block; float: right;">
+                                Add {{ nested_formset.empty_form.nested.minimum_name }}s
+                            </button>
+                            <div style="clear: both;"></div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                    {% if nested_formset.empty_form.nested %}
+                        <div id="container_{{ nested_formset.empty_form.nested.prefix }}" style="margin-left: 30px; display: none;">
+                            {% include 'tender/nested_formset.html' with nested_formset=nested_formset.empty_form.nested %}
+                        </div>
+                        <script>
+                            var prefix = '{{ nested_formset.empty_form.nested.prefix }}';
+                            var empty_prefix = '{{ nested_formset.empty_form.nested.empty_prefix }}';
+                            initialize_formset(prefix, empty_prefix);
+                        </script>
+                    {% endif %}
+
+                <hr />
+            {% endescapescript %}
+        </script>
+
+        <div class="form-group">
+            <button type="button" class="btn btn-default" data-formset-add-{{ nested_formset.prefix }}>
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                Add {{ nested_formset.minimum_name }}
+            </button>
+        </div>
+    </div>
+</fieldset>
+
+{% comment %}
+/* django-formsets-js */
+div[id*="DELETE"] {
+    display: none;
+}
+
+function initialize_formset(prefix, empty_prefix) {
+    if (prefix) {
+        prefix = '-' + prefix;
+    }
+    $('#nested-formset' + prefix).formset({
+        form: '[data-formset-form' + prefix + ']',
+        emptyForm: 'script[type=form-template][data-formset-empty-form' + prefix + ']',
+        body: '[data-formset-body' + prefix + ']',
+        add: '[data-formset-add' + prefix + ']',
+        deleteButton: '[data-formset-delete-button' + prefix + ']',
+        animateForms: true,
+        empty_prefix: empty_prefix,
+    });
+}
+
+var prefix = '{{ nested_formset.prefix }}';
+var empty_prefix = '{{ nested_formset.empty_prefix }}';
+initialize_formset(prefix, empty_prefix);
+{# TODO: make recursive #}
+{% for form in nested_formset %}
+    {% if form.nested %}
+        prefix = '{{ form.nested.prefix }}';
+        empty_prefix = '{{ form.nested.empty_prefix }}';
+        initialize_formset(prefix, empty_prefix);
+    {% endif %}
+{% endfor %}
+{% endcomment %}
