@@ -1,0 +1,4 @@
+include README.md
+recursive-include utils *.py *.html
+recursive-include utils/templates *
+recursive-include utils/static *
