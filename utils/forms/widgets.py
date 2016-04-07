@@ -32,19 +32,19 @@ class MultiFileInput(widgets.ClearableFileInput):
         return return_list
 
     def _check_clear(self, upload, data, files, name):
-        if (not self.is_required
-                and widgets.CheckboxInput().value_from_datadict(
-                    data, files, self.clear_checkbox_name(name)
-                )):
-
+        is_checked = widgets.CheckboxInput().value_from_datadict(
+            data, files, self.clear_checkbox_name(name)
+        )
+        if not self.is_required and is_checked:
             if upload:
                 # If the user contradicts themselves (uploads a new file AND
                 # checks the "clear" checkbox), we return a unique marker
                 # object that FileField will turn into a ValidationError.
                 return widgets.FILE_INPUT_CONTRADICTION
             # False signals to clear any existing value, as opposed to just
-            # None
+            #  None
             return False
+
         return upload
 
 
@@ -171,3 +171,9 @@ class ConfirmMultiFileMultiWidget(widgets.MultiWidget):
             output += rendered_widgets[-1]  # last
 
         return output
+
+    def decompress(self, value):
+        if not value:
+            return [None for widget in self.widgets]
+
+        return value

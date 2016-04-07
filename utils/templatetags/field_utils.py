@@ -1,40 +1,47 @@
 from django import template
+from django.forms import widgets
+
 register = template.Library()
 
 
 @register.filter
 def get_form_field_type(field):
-    return field.field.widget.__class__.__name__
+    return field.field.widget
 
 
 @register.filter
 def is_number(type):
-    return type in ["NumberInput"]
+    return isinstance(type, widgets.NumberInput)
 
 
 @register.filter
 def is_file(type):
-    return type in ["ClearableFileInput"]
+    if hasattr(type, 'widgets'):
+        for widget in type.widgets:
+            if isinstance(widget, widgets.ClearableFileInput):
+                return True
+
+    return isinstance(type, widgets.ClearableFileInput)
 
 
 @register.filter
 def is_datetimepicker(type):
-    return type in ["DateTimePicker"]
+    return isinstance(type, widgets.DateTimePicker)
 
 
 @register.filter
 def is_date(type):
-    return type in ["DateInput"]
+    return isinstance(type, widgets.DateInput)
 
 
 @register.filter
 def is_autocomplete(type):
-    return type in ["AutoCompleteSelectWidget"]
+    return isinstance(type, widgets.AutoCompleteSelectWidget)
 
 
 @register.filter
 def is_checkbox(type):
-    return type in ["CheckboxInput"]
+    return isinstance(type, widgets.CheckboxInput)
 
 
 @register.filter

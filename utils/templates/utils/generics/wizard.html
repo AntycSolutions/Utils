@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block title %} - Create {{ model_name|title }}{% endblock %}
+
+{% block extra_head %}
+    {{ wizard.form.media }}
+
+    {% now 'Y' as current_year %}
+    <script type="text/javascript">
+        var year_range = (
+            "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"
+        );
+
+        {% if wizard.form.nested_formset_class %}
+            function add_nested(args) {
+                var form_idx = args.form_idx;
+                // console.log('add_nested', form_idx);
+                var nested_total_forms = $(
+                    '#id_' + args.form_prefix + '-' +
+                    form_idx + '-' + args.nested_prefix + '-TOTAL_FORMS'
+                );
+                var nested_form_idx = nested_total_forms.val();
+
+                var form = $('#empty_nested_form').html();
+                form = form
+                    .replace(args.empty_prefix_re, form_idx)
+                    .replace(args.nested_empty_prefix, nested_form_idx);
+                $(form).appendTo('#' + form_idx + '-nested_forms');
+
+                nested_total_forms.val(parseInt(nested_form_idx) + 1);
+            }
+        {% endif %}
+
+        $(document).ready(function() {
+            $(".datepicker:visible").datepicker({
+                changeMonth: true, changeYear: true, yearRange: year_range,
+            });
+
+            {% if wizard.form.forms %}
+                var form_prefix = "{{ wizard.form.prefix }}";
+                {% if wizard.form.nested_formset_class %}
+                    var nested_prefix = (
+                        "{{ wizard.form.nested_formset_class.get_default_prefix }}"
+                    );
+                {% endif %}
+
+                var empty_prefix = '{{ wizard.form.empty_prefix }}';
+                var empty_prefix_re = /{{ wizard.form.empty_prefix }}/g;
+                {% if wizard.form.nested_formset_class %}
+                    var nested_empty_prefix = (
+                        /{{ wizard.form.empty_form.nested.empty_prefix }}/g
+                    );
+                {% endif %}
+
+                {# init first form #}
+                var total_forms = $('#id_' + form_prefix + '-TOTAL_FORMS');
+                {# reset in case of page refresh #}
+                total_forms.val({{ wizard.form.total_form_count }});
+
+                $('#add_form').click(function() {
+                    {# add form #}
+                    var form_idx = total_forms.val();
+
+                    var form = $('#empty_form').html();
+                    form = form
+                        .replace(empty_prefix_re, form_idx)
+                        .replace(nested_empty_prefix, 0);
+                    $(form).appendTo('#forms');
+
+                    $('#' + form_idx + '_form .datepicker').datepicker({
+                        changeMonth: true,
+                        changeYear: true,
+                        yearRange: year_range,
+                    });
+
+                    {% if wizard.form.nested_formset_class %}
+                        $('#add_nested_form-' + form_idx).click(function() {
+                            add_nested({
+                                form_prefix: form_prefix,
+                                form_idx: form_idx,
+                                nested_prefix: nested_prefix,
+                                empty_prefix_re: empty_prefix_re,
+                                nested_empty_prefix: nested_empty_prefix,
+                            });
+                        });
+                    {% endif %}
+
+                    total_forms.val(parseInt(form_idx) + 1);
+                });
+
+                {% if wizard.form.nested_formset_class %}
+                    {# init first nested form #}
+                    {% for form in wizard.form.forms %}
+                        var nested_total_forms = $(
+                            '#id_' + form_prefix + '-' +
+                            {{ forloop.counter0 }} + '-' +
+                            nested_prefix + '-TOTAL_FORMS'
+                        );
+                        {# reset in case of page refresh #}
+                        nested_total_forms.val(
+                            {{ form.nested.total_form_count }}
+                        );
+
+                        $('#add_nested_form-{{ forloop.counter0 }}').click(
+                            function() {
+                                add_nested({
+                                    form_prefix: form_prefix,
+                                    form_idx: {{ forloop.counter0 }},
+                                    nested_prefix: nested_prefix,
+                                    empty_prefix_re: empty_prefix_re,
+                                    nested_empty_prefix: nested_empty_prefix,
+                                });
+                            }
+                        );
+                    {% endfor %}
+
+                    {# make empty_nested_management_form properly empty #}
+                    var empty_nested_management_form_str = (
+                        $('#empty_nested_management_form').html()
+                    );
+                    var empty_management_re = new RegExp(
+                        form_prefix + '-0', 'g'
+                    );
+                    empty_nested_management_form_str = (
+                        empty_nested_management_form_str.replace(
+                            empty_management_re,
+                            form_prefix + '-' + empty_prefix
+                        )
+                    );
+                    var empty_nested_management_form = $(
+                        '#empty_nested_management_form'
+                    );
+                    empty_nested_management_form.html(
+                        empty_nested_management_form_str
+                    );
+                    empty_nested_management_form.removeAttr('id');
+                {% endif %}
+            {% endif %}
+        });
+    </script>
+{% endblock extra_head %}
+
+{% block content %}
+
+    <h1>
+        Create {{ model_name|title }}
+    </h1>
+    {% include 'utils/snippets/messages.html' %}
+
+    <form method="POST"
+            {% if wizard.form.is_multipart or wizard.form.nested.is_multipart %}
+                enctype="{{ form_type }}"
+            {% endif %}
+            class="form-horizontal">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        <div class="row">
+            <div class="col-lg-6">
+                {% if parent %}
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label">
+                            <h5>
+                                {{ parent.parent_name|title }}:
+                                <a href="{{ parent.parent_model.get_absolute_url }}">
+                                    {{ parent.parent_text }}
+                                </a>
+                            </h5>
+                        </label>
+                    </div>
+                {% endif %}
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">
+                        <h5>
+                            Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}
+                        </h5>
+                    </label>
+                </div>
+            </div>
+        </div>
+        {% if wizard.form.forms %}
+            {{ wizard.form.management_form }}
+            {{ wizard.form.non_form_errors }}
+            <div id="forms">
+                {% for form in wizard.form.forms %}
+                    <div class="row">
+                        <div class="col-lg-6">
+                            {% include 'utils/generics/form.html' %}
+                        </div>
+                        {# TODO: handle more than 1 level of nested #}
+                        {% if form.nested %}
+                            <div class="col-lg-6">
+                                {{ form.nested.management_form }}
+                                {{ form.nested.non_form_errors }}
+                                <div id="{{ forloop.counter0 }}-nested_forms">
+                                    {% for form in form.nested %}
+                                        {% include 'utils/generics/form.html' %}
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-lg-9 col-lg-offset-3">
+                                        <a href="javascript:void(0)"
+                                                id="add_nested_form-{{ forloop.counter0 }}"
+                                                class="btn btn-default"
+                                                style="margin-top: 20px;">
+                                            <span class="glyphicon glyphicon-plus"
+                                                aria-hidden="true"></span>
+                                            Add another {{ wizard.form.nested_formset_class.minimum_name }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <hr />
+                {% endfor %}
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <div class="col-lg-9 col-lg-offset-3">
+                            <a href="javascript:void(0)"
+                                    id="add_form"
+                                    class="btn btn-default">
+                                <span class="glyphicon glyphicon-plus"
+                                    aria-hidden="true"></span>
+                                Add another {{ wizard.form.minimum_name }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                <div class="col-lg-6">
+                    {% include 'utils/generics/form.html' %}
+                </div>
+            </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-lg-6">
+                {% if wizard.steps.prev %}
+                    <div class="form-group">
+                        <div class="col-lg-9 col-lg-offset-3">
+                            {% if wizard.steps.first != wizard.steps.prev %}
+                                <button name="wizard_goto_step"
+                                        type="submit"
+                                        value="{{ wizard.steps.first }}"
+                                        class="btn btn-default">
+                                    {% trans "First Step" %}
+                                </button>
+                            {% endif %}
+                            <button name="wizard_goto_step"
+                                    type="submit"
+                                    value="{{ wizard.steps.prev }}"
+                                    class="btn btn-default">
+                                {% trans "Previous Step" %}
+                            </button>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="form-group">
+                    <div class="col-lg-9 col-lg-offset-3">
+                        <input type="submit"
+                                value="{% trans 'Submit' %}"
+                                class="btn btn-primary" />
+                        <a href="{{ cancel_url }}"
+                                class="pull-right btn btn-default">
+                            {% trans 'Cancel' %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% if wizard.form.empty_form %}
+        <div id="empty_form" style="display: none;">
+            <div id="{{ wizard.form.empty_prefix }}_form" class="row">
+                <div class="col-lg-6">
+                    {% include 'utils/generics/form.html' with form=wizard.form.empty_form %}
+                </div>
+                {% if wizard.form.empty_form.nested.empty_form %}
+                    <div class="col-lg-6">
+                        <div id="empty_nested_management_form">
+                            {{ wizard.form.forms.0.nested.management_form }}
+                        </div>
+                        <div id="{{ wizard.form.empty_prefix }}-nested_forms">
+                            {% include 'utils/generics/form.html' with form=wizard.form.empty_form.nested.empty_form %}
+                        </div>
+                        <div class="form-group">
+                            <div class="col-lg-9 col-lg-offset-3">
+                                <a href="javascript:void(0)"
+                                        id="add_nested_form-{{ wizard.form.empty_prefix }}"
+                                        class="btn btn-default"
+                                        style="margin-top: 20px;">
+                                    <span class="glyphicon glyphicon-plus"
+                                        aria-hidden="true"></span>
+                                    Add another {{ wizard.form.nested_formset_class.minimum_name }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <hr />
+        </div>
+    {% endif %}
+
+    {% if wizard.form.empty_form.nested.empty_form %}
+        <div id="empty_nested_form" style="display: none;">
+            {% include 'utils/generics/form.html' with form=wizard.form.empty_form.nested.empty_form %}
+        </div>
+    {% endif %}
+
+{% endblock content %}

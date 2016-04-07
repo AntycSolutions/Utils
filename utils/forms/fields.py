@@ -64,7 +64,7 @@ class MultiFileField(forms.FileField):
         if not data and initial:
             return initial
 
-        cleaned_data = super(forms.FileField, self).clean(data)
+        cleaned_data = super().clean(data)
 
         return cleaned_data
 
@@ -80,3 +80,18 @@ class MultiFileField(forms.FileField):
                 cleaned_data.append(datum)
 
         return cleaned_data
+
+    def bound_data(self, data, initial):
+        if isinstance(data, list):
+            all_none = True
+            for datum in data:
+                if datum not in (None, widgets.FILE_INPUT_CONTRADICTION):
+                    all_none = False
+                    break
+            if all_none:
+                return initial
+        else:
+            if data in (None, widgets.FILE_INPUT_CONTRADICTION):
+                return initial
+
+        return data
