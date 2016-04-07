@@ -2,12 +2,13 @@
 
 {% load i18n %}
 
-{% block title %} - Create {{ model_name|title }}{% endblock %}
+{% block title %} - {{ save_text|title }} {{ model_name|title }}{% endblock %}
 
 {% block extra_head %}
     {{ wizard.form.media }}
 
     {% now 'Y' as current_year %}
+    {# TODO: move to static js #}
     <script type="text/javascript">
         var year_range = (
             "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"
@@ -25,7 +26,7 @@
 
                 var form = $('#empty_nested_form').html();
                 form = form
-                    .replace(args.empty_prefix_re, form_idx)
+                    .replace(args.empty_prefix, form_idx)
                     .replace(args.nested_empty_prefix, nested_form_idx);
                 $(form).appendTo('#' + form_idx + '-nested_forms');
 
@@ -46,8 +47,7 @@
                     );
                 {% endif %}
 
-                var empty_prefix = '{{ wizard.form.empty_prefix }}';
-                var empty_prefix_re = /{{ wizard.form.empty_prefix }}/g;
+                var empty_prefix = /{{ wizard.form.empty_prefix }}/g;
                 {% if wizard.form.nested_formset_class %}
                     var nested_empty_prefix = (
                         /{{ wizard.form.empty_form.nested.empty_prefix }}/g
@@ -65,7 +65,7 @@
 
                     var form = $('#empty_form').html();
                     form = form
-                        .replace(empty_prefix_re, form_idx)
+                        .replace(empty_prefix, form_idx)
                         .replace(nested_empty_prefix, 0);
                     $(form).appendTo('#forms');
 
@@ -75,13 +75,14 @@
                         yearRange: year_range,
                     });
 
+                    {# TODO: support more than one level of nested #}
                     {% if wizard.form.nested_formset_class %}
                         $('#add_nested_form-' + form_idx).click(function() {
                             add_nested({
                                 form_prefix: form_prefix,
                                 form_idx: form_idx,
                                 nested_prefix: nested_prefix,
-                                empty_prefix_re: empty_prefix_re,
+                                empty_prefix: empty_prefix,
                                 nested_empty_prefix: nested_empty_prefix,
                             });
                         });
@@ -90,6 +91,7 @@
                     total_forms.val(parseInt(form_idx) + 1);
                 });
 
+                {# TODO: support more than one level of nested #}
                 {% if wizard.form.nested_formset_class %}
                     {# init first nested form #}
                     {% for form in wizard.form.forms %}
@@ -109,33 +111,12 @@
                                     form_prefix: form_prefix,
                                     form_idx: {{ forloop.counter0 }},
                                     nested_prefix: nested_prefix,
-                                    empty_prefix_re: empty_prefix_re,
+                                    empty_prefix: empty_prefix,
                                     nested_empty_prefix: nested_empty_prefix,
                                 });
                             }
                         );
                     {% endfor %}
-
-                    {# make empty_nested_management_form properly empty #}
-                    var empty_nested_management_form_str = (
-                        $('#empty_nested_management_form').html()
-                    );
-                    var empty_management_re = new RegExp(
-                        form_prefix + '-0', 'g'
-                    );
-                    empty_nested_management_form_str = (
-                        empty_nested_management_form_str.replace(
-                            empty_management_re,
-                            form_prefix + '-' + empty_prefix
-                        )
-                    );
-                    var empty_nested_management_form = $(
-                        '#empty_nested_management_form'
-                    );
-                    empty_nested_management_form.html(
-                        empty_nested_management_form_str
-                    );
-                    empty_nested_management_form.removeAttr('id');
                 {% endif %}
             {% endif %}
         });
@@ -145,15 +126,16 @@
 {% block content %}
 
     <h1>
-        Create {{ model_name|title }}
+        {{ save_text|title }} {{ model_name|title }}
     </h1>
     {% include 'utils/snippets/messages.html' %}
 
     <form method="POST"
-            {% if wizard.form.is_multipart or wizard.form.nested.is_multipart %}
-                enctype="{{ form_type }}"
-            {% endif %}
-            class="form-horizontal">
+        {% if wizard.form.is_multipart or wizard.form.nested.is_multipart %}
+            enctype="{{ form_type }}"
+        {% endif %}
+        class="form-horizontal"
+            >
         {% csrf_token %}
         {{ wizard.management_form }}
         <div class="row">
@@ -283,8 +265,8 @@
                 </div>
                 {% if wizard.form.empty_form.nested.empty_form %}
                     <div class="col-lg-6">
-                        <div id="empty_nested_management_form">
-                            {{ wizard.form.forms.0.nested.management_form }}
+                        <div>
+                            {{ wizard.form.empty_form.nested.management_form }}
                         </div>
                         <div id="{{ wizard.form.empty_prefix }}-nested_forms">
                             {% include 'utils/generics/form.html' with form=wizard.form.empty_form.nested.empty_form %}
@@ -292,9 +274,10 @@
                         <div class="form-group">
                             <div class="col-lg-9 col-lg-offset-3">
                                 <a href="javascript:void(0)"
-                                        id="add_nested_form-{{ wizard.form.empty_prefix }}"
-                                        class="btn btn-default"
-                                        style="margin-top: 20px;">
+                                    id="add_nested_form-{{ wizard.form.empty_prefix }}"
+                                    class="btn btn-default"
+                                    style="margin-top: 20px;"
+                                        >
                                     <span class="glyphicon glyphicon-plus"
                                         aria-hidden="true"></span>
                                     Add another {{ wizard.form.nested_formset_class.minimum_name }}
