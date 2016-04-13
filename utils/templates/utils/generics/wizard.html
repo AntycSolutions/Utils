@@ -245,7 +245,7 @@
                 <div class="form-group">
                     <div class="col-lg-9 col-lg-offset-3">
                         <input type="submit"
-                                value="{% trans 'Submit' %}"
+                                value="{% if not wizard.steps.next %}{{ save_text|title }}{% else %}{% trans 'Next' %}{% endif %}"
                                 class="btn btn-primary" />
                         <a href="{{ cancel_url }}"
                                 class="pull-right btn btn-default">
