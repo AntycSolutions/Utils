@@ -2,7 +2,6 @@ import itertools
 
 from django import forms
 from django.forms import models as forms_models
-from django.contrib.auth import forms as auth_forms
 
 
 class BaseNestedFormSet(forms.BaseInlineFormSet):
@@ -178,10 +177,3 @@ def minimum_nestedformset_factory(
         )
 
     return NestedFormSet  # Is class, not instance
-
-
-class AuthenticationForm(auth_forms.AuthenticationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fields['username'].widget.attrs['autofocus'] = True
