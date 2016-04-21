@@ -8,6 +8,7 @@
 {% block extra_head %}
     {% now 'Y' as current_year %}
     <script type="text/javascript">
+        var year_range = "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}";
         $(document).ready(function() {
             var prefix = "{{ formset.get_default_prefix }}";
 
@@ -33,37 +34,56 @@
 
             $('#add_form').click(function() {
                 var form_count = $('#id_' + prefix + '-TOTAL_FORMS').val();
-                var form = document.getElementById('{{ inline_model_name }}_empty_form').cloneNode(true);
+                var form = document.getElementById(
+                    '{{ inline_model_name }}_empty_form'
+                ).cloneNode(true);
                 form.removeAttribute('id');
                 form.style.display = '';
                 var children = form.children;
-                var inline_prefix = empty_form_prefix.replace(/__prefix__/,
-                                                              form_count);
+                var inline_prefix = empty_form_prefix.replace(
+                    /__prefix__/, form_count
+                );
                 update_prefix(children, inline_prefix);
+
                 dp = $(form).find('.datepicker');
                 // need to apply again, probably because it's cloned
                 dp.removeClass('hasDatepicker');
-                dp.datepicker(
-                    {changeMonth: true,
-                     changeYear: true,
-                     yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"}
-                );
+                dp.datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: year_range,
+                });
+
+                if (typeof add_form_callback === 'function') {
+                    add_form_callback($(form), form_count);
+                }
+
                 // one parent is col, second parent is form-group
                 $(form).insertBefore($('#add_form').parent().parent());
-                $('#id_' + prefix + '-TOTAL_FORMS').val(parseInt(form_count) + 1);
+                $('#id_' + prefix + '-TOTAL_FORMS').val(
+                    parseInt(form_count) + 1
+                );
             });
 
-            $(function() {
-                $(".datepicker").datepicker(
-                    {changeMonth: true,
-                     changeYear: true,
-                     yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"});
+            $(".datepicker").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                yearRange: year_range,
             });
+
+            {% for form in formset %}
+                if (typeof add_form_callback === 'function') {
+                    add_form_callback(
+                        $('#{{ inline_model_name|slugify }}_form'),
+                        {{ forloop.counter0 }}
+                    );
+                }
+            {% endfor %}
         });
     </script>
 
     {% if autocomplete %}
-        <link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
+        <link href="{% static 'ajax_select/css/ajax_select.css' %}" rel="stylesheet" type="text/css" />
     {% endif %}
 
     <script type="text/javascript">
@@ -104,32 +124,34 @@
                     {{ formset.management_form }}
                     {{ formset.non_form_errors }}
                     {% for form in formset %}
-                        {% if not inline %}
-                            {% include 'utils/generics/form.html' %}
-                            {% if not forloop.last %}
-                                <hr />
-                            {% endif %}
-                        {% else %}
-                            {{ form.non_field_errors }}
-                            {% for hidden in form.hidden_fields %}
-                                {{ hidden.errors }}
-                                {{ hidden }}
-                            {% endfor %}
-                            {% for field in form.visible_fields %}
-                                {% if inline %}
-                                <div class="form-group">
-                                    {{ field.errors }}
-                                    <div class="col-lg-10">
-                                        {{ field.label_tag }} {{ field }}
-                                    </div>
-                                </div>
-                                {% else %}
-                                    {{ field.errors }}
-                                    {{ field.label_tag }} {{ field }}
+                        <div id="{{ inline_model_name|slugify }}_form">
+                            {% if not inline %}
+                                {% include 'utils/generics/form.html' %}
+                                {% if not forloop.last %}
+                                    <hr />
                                 {% endif %}
-                            {% endfor %}
-                            <br />
-                        {% endif %}
+                            {% else %}
+                                {{ form.non_field_errors }}
+                                {% for hidden in form.hidden_fields %}
+                                    {{ hidden.errors }}
+                                    {{ hidden }}
+                                {% endfor %}
+                                {% for field in form.visible_fields %}
+                                    {% if inline %}
+                                    <div class="form-group">
+                                        {{ field.errors }}
+                                        <div class="col-lg-10">
+                                            {{ field.label_tag }} {{ field }}
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                        {{ field.errors }}
+                                        {{ field.label_tag }} {{ field }}
+                                    {% endif %}
+                                {% endfor %}
+                                <br />
+                            {% endif %}
+                        </div>
                     {% endfor %}
                     <div class="form-group">
                         <div class="col-lg-9 col-lg-offset-3">
@@ -169,7 +191,9 @@
 
 {% block extra_scripts %}
     {% if autocomplete %}
-        <script src="{% static 'ajax_select/js/ajax_select.js' %}"></script>
-        <link rel="stylesheet" href="{% static 'ajax_select/css/ajax_select.css' %}">
+        <script src="{% static 'ajax_select/js/ajax_select.js' %}" type="text/javascript"></script>
+    {% endif %}
+    {% if js_url %}
+        <script src="{{ js_url }}" type="text/javascript"></script>
     {% endif %}
 {% endblock %}
