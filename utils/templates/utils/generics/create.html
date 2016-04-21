@@ -74,7 +74,7 @@
             {% for form in formset %}
                 if (typeof add_form_callback === 'function') {
                     add_form_callback(
-                        $('#{{ inline_model_name|slugify }}_form'),
+                        $('#{{ forloop.counter0 }}_{{ inline_model_name|slugify }}_form'),
                         {{ forloop.counter0 }}
                     );
                 }
@@ -92,6 +92,10 @@
             $('.btn-file label').css('margin-bottom', '0px');
         });
     </script>
+
+    {% if css_url %}
+        <link href="{{ css_url }}" rel="stylesheet" type="text/css" />
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -99,6 +103,7 @@
     <h1>
         Create {{ model_name|title }}
     </h1>
+
     {% include 'utils/snippets/messages.html' %}
 
     <form id="create_{{ model_name }}_form" class="form-horizontal" method="POST" enctype="{{ form_type }}">
@@ -124,7 +129,7 @@
                     {{ formset.management_form }}
                     {{ formset.non_form_errors }}
                     {% for form in formset %}
-                        <div id="{{ inline_model_name|slugify }}_form">
+                        <div id="{{ forloop.counter0 }}_{{ inline_model_name|slugify }}_form">
                             {% if not inline %}
                                 {% include 'utils/generics/form.html' %}
                                 {% if not forloop.last %}
