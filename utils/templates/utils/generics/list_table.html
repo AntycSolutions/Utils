@@ -65,13 +65,15 @@
                                 </td>
                             {% elif field_value.field|get_model_field_type|is_foreignkey %}
                                 <td>
-                                    {% if field_value.value.get_absolute_url %}
-                                        <a href="{{ field_value.value.get_absolute_url }}">
-                                            {{ field_value.value }}
-                                        </a>
-                                    {% else %}
-                                        {{ field_value.value }}
-                                    {% endif %}
+                                    {% with url=field_value.value.get_absolute_url value=field_value.value.get_str %}
+                                        {% if url %}
+                                            <a href="{{ url }}">
+                                                {% firstof value field_value.value %}
+                                            </a>
+                                        {% else %}
+                                            {% firstof value field_value.value %}
+                                        {% endif %}
+                                    {% endwith %}
                                 </td>
                             {% elif field_value.field|get_model_field_type|is_textfield %}
                                 <td style="widtH: 30%;">

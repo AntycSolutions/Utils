@@ -64,9 +64,15 @@
                                 </label>
                                 <div class="col-lg-8">
                                     <p class="form-control-static">
-                                        <a href="{{ field_value.value.get_absolute_url }}">
-                                            {{ field_value.value }}
-                                        </a>
+                                        {% with url=field_value.value.get_absolute_url value=field_value.value.get_str %}
+                                            {% if url %}
+                                                <a href="{{ url }}">
+                                                    {% firstof value field_value.value %}
+                                                </a>
+                                            {% else %}
+                                                {% firstof value field_value.value %}
+                                            {% endif %}
+                                        {% endwith %}
                                     </p>
                                 </div>
                             </div>
