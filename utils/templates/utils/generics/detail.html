@@ -39,8 +39,8 @@
                 <div class="form-horizontal">
                     {% for name, field_value in object.get_all_fields.items %}
                         {% if name == 'id' %}
-                            <!-- Skip ID -->
-                        {% elif field_value.field|get_model_field_type|is_image %}
+                            {# Skip ID #}
+                        {% elif field_value.field|is_image %}
                             <div class="form-group">
                                 <label class="col-lg-4 control-label">
                                     {% verbose_field_name object name %}
@@ -52,12 +52,12 @@
                                                 <img class="lazy img-responsive" width="256px" data-src="{% url 'get_thumbnail' 256 256 field_value.value.url|urlencode:"" %}" />
                                             </a>
                                         {% else %}
-                                            <!-- No Image -->
+                                            {# No Image #}
                                         {% endif %}
                                     </p>
                                 </div>
                             </div>
-                        {% elif field_value.field|get_model_field_type|is_foreignkey %}
+                        {% elif field_value.field|is_foreignkey %}
                             <div class="form-group">
                                 <label class="col-lg-4 control-label">
                                     {% verbose_field_name object name %}
@@ -76,7 +76,7 @@
                                     </p>
                                 </div>
                             </div>
-                        {% elif field_value.field|get_model_field_type|is_fileset %}
+                        {% elif field_value.field|is_fileset %}
                             <div class="form-group">
                                 <label class="col-lg-4 control-label">
                                     {% verbose_field_name object name %}
@@ -136,9 +136,9 @@
                                                 <tr>
                                                     {% for name, field_value in inline.get_all_fields.items %}
                                                         {% if name == "id" %}
-                                                            <!-- Skip ID -->
+                                                            {# Skip ID #}
                                                         {% elif field_value.value == object %}
-                                                            <!-- Skip object -->
+                                                            {# Skip object #}
                                                         {% else %}
                                                             <th>
                                                                 {{ field_value.field.verbose_name }}
@@ -147,15 +147,15 @@
                                                     {% endfor %}
                                                 </tr>
                                             </thead>
-                                            <!-- strange formatting is intentional -->
+                                            {# strange formatting is intentional #}
                                             <tbody>
                                         {% endif %}
                                                 <tr>
                                                     {% for name, field_value in inline.get_all_fields.items %}
                                                         {% if name == "id" %}
-                                                            <!-- Skip ID -->
+                                                            {# Skip ID #}
                                                         {% elif field_value.value == object %}
-                                                            <!-- Skip object -->
+                                                            {# Skip object #}
                                                         {% elif name in object.money_fields %}
                                                             <td>
                                                                 ${{ field_value.value }}

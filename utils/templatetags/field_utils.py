@@ -1,8 +1,13 @@
 from django import template
 from django.forms import widgets
+from django.db import models
+
+from utils import model_utils
 
 register = template.Library()
 
+
+# form
 
 @register.filter
 def get_form_field_type(field):
@@ -10,60 +15,64 @@ def get_form_field_type(field):
 
 
 @register.filter
-def is_number(type):
-    return isinstance(type, widgets.NumberInput)
+def is_number(widget):
+    return isinstance(widget, widgets.NumberInput)
 
 
 @register.filter
-def is_file(type):
-    if hasattr(type, 'widgets'):
-        for widget in type.widgets:
+def is_file(widget):
+    if hasattr(widget, 'widgets'):
+        for widget in widget.widgets:
             if isinstance(widget, widgets.ClearableFileInput):
                 return True
 
-    return isinstance(type, widgets.ClearableFileInput)
+    return isinstance(widget, widgets.ClearableFileInput)
 
 
 @register.filter
-def is_datetimepicker(type):
-    return isinstance(type, widgets.DateTimePicker)
+def is_datetimepicker(widget):
+    return isinstance(widget, widgets.DateTimePicker)
 
 
 @register.filter
-def is_date(type):
-    return isinstance(type, widgets.DateInput)
+def is_date(widget):
+    return isinstance(widget, widgets.DateInput)
 
 
 @register.filter
-def is_autocomplete(type):
-    return isinstance(type, widgets.AutoCompleteSelectWidget)
+def is_autocomplete(widget):
+    return isinstance(widget, widgets.AutoCompleteSelectWidget)
 
 
 @register.filter
-def is_checkbox(type):
-    return isinstance(type, widgets.CheckboxInput)
+def is_checkbox(widget):
+    return isinstance(widget, widgets.CheckboxInput)
+
+
+# model
+
+@register.filter
+def is_image(field):
+    return isinstance(field, models.ImageField)
 
 
 @register.filter
-def get_model_field_type(field):
-    return field.__class__.__name__
+def is_foreignkey(field):
+    return isinstance(
+        field,
+        (
+            models.ForeignKey,
+            models.OneToOneField,
+            model_utils.FieldList.PseudoForeignKey
+        )
+    )
 
 
 @register.filter
-def is_image(type):
-    return type in ["ImageField"]
+def is_fileset(field):
+    return isinstance(field, model_utils.FieldList.PseudoFileSet)
 
 
 @register.filter
-def is_foreignkey(type):
-    return type in ["ForeignKey", "PseudoForeignKey"]
-
-
-@register.filter
-def is_fileset(type):
-    return type in ["PseudoFileSet"]
-
-
-@register.filter
-def is_textfield(type):
-    return type in ["TextField"]
+def is_textfield(field):
+    return isinstance(field, models.TextField)

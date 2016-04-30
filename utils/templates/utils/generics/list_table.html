@@ -11,7 +11,7 @@
                                 <!-- empty -->
                             {% elif name == "id" %}
                                 <th></th>
-                            {% elif field_value.field|get_model_field_type|is_textfield %}
+                            {% elif field_value.field|is_textfield %}
                                 <th style="width: 30%;">
                                     {{ field_value.field.verbose_name|capfirst }}
                                 </th>
@@ -53,7 +53,7 @@
                                         Delete
                                     </a>
                                 </td>
-                            {% elif field_value.field|get_model_field_type|is_image %}
+                            {% elif field_value.field|is_image %}
                                 <td>
                                     {% if field_value.value %}
                                         <a href="{{ field_value.value.url }}">
@@ -63,7 +63,7 @@
                                         <!-- No Image -->
                                     {% endif %}
                                 </td>
-                            {% elif field_value.field|get_model_field_type|is_foreignkey %}
+                            {% elif field_value.field|is_foreignkey %}
                                 <td>
                                     {% with url=field_value.value.get_absolute_url value=field_value.value.get_str %}
                                         {% if url %}
@@ -75,7 +75,7 @@
                                         {% endif %}
                                     {% endwith %}
                                 </td>
-                            {% elif field_value.field|get_model_field_type|is_textfield %}
+                            {% elif field_value.field|is_textfield %}
                                 <td style="widtH: 30%;">
                                     {{ field_value.value }}
                                 </td>
