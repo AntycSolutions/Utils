@@ -153,12 +153,11 @@ class FormsetUpdateView(edit.UpdateView):
         return form_class
 
 
-class InlineFormsetCreateView(edit.CreateView):
-
+class InlineFormSetCreateView(edit.CreateView):
     def get(self, request, *args, **kwargs):
         self.object = None
         form = self.get_form()
-        formset = self.inline_formset()
+        formset = self.get_inline_formset()
 
         return self.render_to_response(
             self.get_context_data(form=form, formset=formset)
@@ -167,7 +166,9 @@ class InlineFormsetCreateView(edit.CreateView):
     def post(self, request, *args, **kwargs):
         self.object = None
         form = self.get_form()
-        formset = self.inline_formset(self.request.POST)
+        formset = self.get_inline_formset(
+            self.request.POST, self.request.FILES
+        )
 
         if form.is_valid() and formset.is_valid():
             return self.form_valid(form, formset)
@@ -187,12 +188,11 @@ class InlineFormsetCreateView(edit.CreateView):
         )
 
 
-class InlineFormsetUpdateView(edit.UpdateView):
-
+class InlineFormSetUpdateView(edit.UpdateView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = self.get_form()
-        formset = self.inline_formset(instance=self.object)
+        formset = self.get_inline_formset(instance=self.object)
 
         return self.render_to_response(
             self.get_context_data(form=form, formset=formset)
@@ -201,7 +201,9 @@ class InlineFormsetUpdateView(edit.UpdateView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = self.get_form()
-        formset = self.inline_formset(self.request.POST, instance=self.object)
+        formset = self.get_inline_formset(
+            self.request.POST, self.request.FILES, instance=self.object
+        )
 
         if form.is_valid() and formset.is_valid():
             return self.form_valid(form, formset)
