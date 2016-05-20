@@ -220,3 +220,7 @@ class InlineFormSetUpdateView(edit.UpdateView):
         return self.render_to_response(
             self.get_context_data(form=form, formset=formset)
         )
+
+
+def raise_exception(request):
+    raise Exception('Intentional error: raise_exception')
