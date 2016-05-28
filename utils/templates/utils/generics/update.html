@@ -10,6 +10,18 @@
     {% block fallback_load %}
         {{ block.super }}
 
+        {% if autocomplete %}
+            ajax_select_css: "{% static 'ajax_select/css/ajax_select.css' %}",
+        {% endif %}
+
+        {% if css_url %}
+            css_url: "{{ css_url }}",
+        {% endif %}
+
+        {% if js_url %}
+            js_url: "{{ js_url }}",
+        {% endif %}
+
         {% with css_dict=form.media|get_attr:"_css" %}
             {% for key, css_list in css_dict.items %}
                 // {{ key }}
@@ -33,6 +45,10 @@
 <script type="text/javascript">
     {% block fallback_shim %}
         {{ block.super }}
+
+        {% if js_url %}
+            js_url: ['jQuery'],
+        {% endif %}
 
         {% for js in form.media|get_attr:"_js" %}
             'media_{{ forloop.counter0 }}_js': ['jQuery.fn.modal'],
@@ -128,20 +144,6 @@
         });
     {% endblock %}
 </script>
-
-{% block extra_head %}
-    {% if autocomplete %}
-        <link href="{% static 'ajax_select/css/ajax_select.css' %}" rel="stylesheet" type="text/css" />
-    {% endif %}
-
-    {% if css_url %}
-        <link href="{{ css_url }}" rel="stylesheet" type="text/css" />
-    {% endif %}
-
-    {% if js_url %}
-        <script src="{{ js_url }}" type="text/javascript"></script>
-    {% endif %}
-{% endblock %}
 
 {% block content %}
 
