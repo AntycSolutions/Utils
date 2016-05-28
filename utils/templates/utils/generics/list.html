@@ -2,6 +2,25 @@
 
 {% block title %} - {{ model_name_plural|title }}{% endblock %}
 
+{% if datesearch %}
+    <script type="text/javascript">
+        {% block fallback_ready %}
+            {{ block.super }}
+
+            {% now 'Y' as current_year %}
+            var year_range = "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}";
+
+            $(document).ready(function() {
+                $(".datepicker").datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    yearRange: year_range,
+                });
+            });
+        {% endblock %}
+    </script>
+{% endif %}
+
 {% block content %}
 
     <h1>{{ model_name_plural|title }}</h1>
@@ -41,24 +60,11 @@
         {% endfor %}
         {% if datesearch %}
             <div class="form-group">
-                <input type="text" id="dateFromSearchBox" class="form-control search-query" name="df" placeholder="Date From" value="{{ df }}" />
+                <input type="text" id="dateFromSearchBox" class="form-control search-query datepicker" name="df" placeholder="Date From" value="{{ df }}" />
             </div>
             <div class="form-group">
-                <input type="text" id="dateToSearchBox" class="form-control search-query" name="dt" placeholder="Date To" value="{{ dt }}" />
+                <input type="text" id="dateToSearchBox" class="form-control search-query datepicker" name="dt" placeholder="Date To" value="{{ dt }}" />
             </div>
-            {% now 'Y' as current_year %}
-            <script>
-                $(function() {
-                    $("#dateFromSearchBox").datepicker(
-                        {changeMonth: true,
-                         changeYear: true,
-                         yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"});
-                    $("#dateToSearchBox").datepicker(
-                        {changeMonth: true,
-                         changeYear: true,
-                         yearRange: "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"});
-                });
-            </script>
         {% endif %}
         {% if search or datesearch or selects %}
             <button type="submit" class="btn">
@@ -125,8 +131,4 @@
     {% endif %}
     <br />
 
-{% endblock %}
-
-{% block extra_scripts %}
-    {% include 'utils/snippets/lazy.html' %}
 {% endblock %}

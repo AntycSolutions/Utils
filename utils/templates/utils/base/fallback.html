@@ -1,0 +1,59 @@
+{% extends 'utils/base/html_base.html' %}
+
+{% load static %}
+
+{% block head_scripts %}
+    {{ block.super }}
+
+    {% if settings.UTILS.fallback %}
+        {# fallback js #}
+        <script src="//cdnjs.cloudflare.com/ajax/libs/fallback/1.1.8/fallback.min.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            if (typeof fallback === 'undefined') {
+                // fallback fallback
+                var fallback_script = document.createElement('script');
+                fallback_script.type = "text/javascript";
+                fallback_script.src = "{% static 'utils/js/fallback.min.js' %}";
+                fallback_script.onload = load_fallback; // IE 8+
+                var head = document.head; // IE 9+
+                head.appendChild(fallback_script);
+            }
+            else {
+                load_fallback();
+            }
+
+            function load_fallback() {
+                fallback.load(
+                    // css/js
+                    {
+                        {% block fallback_load %}
+                            // css
+                            // key/str: list of str/str
+
+                            // js
+                            // THE KEY MUST BE THE LIBRARIES WINDOW VARIABLE!
+                            // key/str: list of str/str
+                        {% endblock %}
+                    },
+                    // options
+                    {
+                        shim: {
+                            {% block fallback_shim %}
+                                // key/str: list of str
+                            {% endblock %}
+                        }
+                    }
+                );
+
+                // fallback.ready(['jQuery'], function() {
+                // });
+
+                fallback.ready(function() {
+                    {% block fallback_ready %}
+                        // internal js
+                    {% endblock %}
+                });
+            }
+        </script>
+    {% endif %}
+{% endblock %}

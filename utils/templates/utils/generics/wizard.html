@@ -1,44 +1,54 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% load i18n %}
+{% load static %}
+{% load template_utils %}
 
 {% block title %} - {{ save_text|title }} {{ model_name|title }}{% endblock %}
 
-{% block extra_head %}
-    {{ wizard.form.media }}
+<script type="text/javascript">
+    {% block fallback_load %}
+        {{ block.super }}
 
-    {% now 'Y' as current_year %}
-    {# TODO: move to static js #}
-    <script type="text/javascript">
-        var year_range = (
-            "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}"
-        );
+        {% with css_dict=wizard.form.media|get_attr:"_css" %}
+            {% for key, css_list in css_dict.items %}
+                // {{ key }}
+                {% for css in css_list %}
+                    'media_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}_css': "{% static css %}",
+                {% endfor %}
+            {% endfor %}
+        {% endwith %}
+        {% for js in wizard.form.media|get_attr:"_js" %}
+            'media_{{ forloop.counter0 }}_js': "{% static js %}",
+        {% endfor %}
+    {% endblock %}
+</script>
 
-        {% if wizard.form.nested_formset_class %}
-            function add_nested(args) {
-                var form_idx = args.form_idx;
-                // console.log('add_nested', form_idx);
-                var nested_total_forms = $(
-                    '#id_' + args.form_prefix + '-' +
-                    form_idx + '-' + args.nested_prefix + '-TOTAL_FORMS'
-                );
-                var nested_form_idx = nested_total_forms.val();
+<script type="text/javascript">
+    {% block fallback_shim %}
+        {{ block.super }}
 
-                var form = $('#empty_nested_form').html();
-                form = form
-                    .replace(args.empty_prefix, form_idx)
-                    .replace(args.nested_empty_prefix, nested_form_idx);
-                $(form).appendTo('#' + form_idx + '-nested_forms');
+        {% for js in wizard.form.media|get_attr:"_js" %}
+            'media_{{ forloop.counter0 }}_js': ['jQuery.fn.modal'],
+        {% endfor %}
+    {% endblock %}
+</script>
 
-                nested_total_forms.val(parseInt(nested_form_idx) + 1);
-            }
-        {% endif %}
+<script type="text/javascript">
+    {% block fallback_ready %}
+        {{ block.super }}
+
+        {% now 'Y' as current_year %}
+        var year_range = "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}";
 
         $(document).ready(function() {
             $(".datepicker:visible").datepicker({
-                changeMonth: true, changeYear: true, yearRange: year_range,
+                changeMonth: true,
+                changeYear: true,
+                yearRange: year_range,
             });
 
+            {# TODO: move to static js #}
             {% if wizard.form.forms %}
                 var form_prefix = "{{ wizard.form.prefix }}";
                 {% if wizard.form.nested_formset_class %}
@@ -120,8 +130,8 @@
                 {% endif %}
             {% endif %}
         });
-    </script>
-{% endblock extra_head %}
+    {% endblock %}
+</script>
 
 {% block content %}
 
@@ -298,3 +308,29 @@
     {% endif %}
 
 {% endblock content %}
+
+{% block extra_scripts %}
+    {{ block.super }}
+
+    <script type="text/javascript">
+        {% if wizard.form.nested_formset_class %}
+            function add_nested(args) {
+                var form_idx = args.form_idx;
+                // console.log('add_nested', form_idx);
+                var nested_total_forms = $(
+                    '#id_' + args.form_prefix + '-' +
+                    form_idx + '-' + args.nested_prefix + '-TOTAL_FORMS'
+                );
+                var nested_form_idx = nested_total_forms.val();
+
+                var form = $('#empty_nested_form').html();
+                form = form
+                    .replace(args.empty_prefix, form_idx)
+                    .replace(args.nested_empty_prefix, nested_form_idx);
+                $(form).appendTo('#' + form_idx + '-nested_forms');
+
+                nested_total_forms.val(parseInt(nested_form_idx) + 1);
+            }
+        {% endif %}
+    </script>
+{% endblock %}

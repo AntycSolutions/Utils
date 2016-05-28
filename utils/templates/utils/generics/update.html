@@ -2,14 +2,62 @@
 
 {% load static %}
 {% load field_utils %}
+{% load template_utils %}
 
 {% block title %} - Update {{ model_name|title }}{% endblock %}
 
-{% block extra_head %}
-    {% now 'Y' as current_year %}
-    <script type="text/javascript">
+<script type="text/javascript">
+    {% block fallback_load %}
+        {{ block.super }}
+
+        {% with css_dict=form.media|get_attr:"_css" %}
+            {% for key, css_list in css_dict.items %}
+                // {{ key }}
+                {% for css in css_list %}
+                    'media_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}_css': "{% static css %}",
+                {% endfor %}
+            {% endfor %}
+        {% endwith %}
+        {% for js in form.media|get_attr:"_js" %}
+            'media_{{ forloop.counter0 }}_js': "{% static js %}",
+        {% endfor %}
+
+        {% if autocomplete %}
+            'jQuery.fn.autocompleteselect': [
+                "{% static 'ajax_select/js/ajax_select.js' %}"
+            ],
+        {% endif %}
+    {% endblock %}
+</script>
+
+<script type="text/javascript">
+    {% block fallback_shim %}
+        {{ block.super }}
+
+        {% for js in form.media|get_attr:"_js" %}
+            'media_{{ forloop.counter0 }}_js': ['jQuery.fn.modal'],
+        {% endfor %}
+
+        {% if autocomplete %}
+            'jQuery.fn.autocompleteselect': ['jQuery.ui'],
+        {% endif %}
+    {% endblock %}
+</script>
+
+<script type="text/javascript">
+    {% block fallback_ready %}
+        {{ block.super }}
+
+        {% now 'Y' as current_year %}
         var year_range = "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}";
+
         $(document).ready(function() {
+            $(".datepicker").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                yearRange: year_range,
+            });
+
             var prefix = "{{ formset.get_default_prefix }}";
 
             // Original html value does not match
@@ -65,12 +113,6 @@
                 );
             });
 
-            $(".datepicker").datepicker({
-                changeMonth: true,
-                changeYear: true,
-                yearRange: year_range,
-            });
-
             {% for form in formset %}
                 if (typeof add_form_callback === 'function') {
                     add_form_callback(
@@ -79,22 +121,25 @@
                     );
                 }
             {% endfor %}
-        });
-    </script>
 
+            {# file input formatting #}
+            $('<br />').insertBefore('.btn-file input[type=checkbox]');
+            $('.btn-file label').css('margin-bottom', '0px');
+        });
+    {% endblock %}
+</script>
+
+{% block extra_head %}
     {% if autocomplete %}
         <link href="{% static 'ajax_select/css/ajax_select.css' %}" rel="stylesheet" type="text/css" />
     {% endif %}
 
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $('<br />').insertBefore('.btn-file input[type=checkbox]');
-            $('.btn-file label').css('margin-bottom', '0px');
-        });
-    </script>
-
     {% if css_url %}
         <link href="{{ css_url }}" rel="stylesheet" type="text/css" />
+    {% endif %}
+
+    {% if js_url %}
+        <script src="{{ js_url }}" type="text/javascript"></script>
     {% endif %}
 {% endblock %}
 
@@ -192,13 +237,4 @@
         </div>
     </form>
 
-{% endblock %}
-
-{% block extra_scripts %}
-    {% if autocomplete %}
-        <script src="{% static 'ajax_select/js/ajax_select.js' %}" type="text/javascript"></script>
-    {% endif %}
-    {% if js_url %}
-        <script src="{{ js_url }}" type="text/javascript"></script>
-    {% endif %}
 {% endblock %}

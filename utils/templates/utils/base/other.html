@@ -1,0 +1,60 @@
+{% extends 'utils/base/bootstrap.html' %}
+
+{% load static %}
+
+{% if settings.UTILS.fallback %}
+    <script type="text/javascript">
+        {% block fallback_load %}
+            {{ block.super }}
+
+            {% if settings.UTILS.font_awesome %}
+                font_awesome_css: [
+                    '//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css',
+                    "{% static 'utils/css/font-awesome.min.css' %}"
+                ],
+            {% endif %}
+
+            {% if settings.UTILS.jquery_ui %}
+                jquery_ui_smoothness_css: [
+                    '//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css',
+                    "{% static 'utils/css/jquery-ui.css' %}"
+                ],
+
+                'jQuery.ui': [
+                    '//code.jquery.com/ui/1.11.4/jquery-ui.min.js',
+                    "{% static 'utils/js/jquery-ui.min.js' %}"
+                ],
+            {% endif %}
+
+            {% if lazy %}
+                'jQuery.fn.lazy': [
+                    '//cdn.jsdelivr.net/jquery.lazy/0.5.3/jquery.lazy.min.js',
+                    "{% static 'utils/js/jquery.lazy.min.js' %}"
+                ],
+            {% endif %}
+        {% endblock %}
+
+        {% block fallback_shim %}
+            {{ block.super }}
+
+            {% if settings.UTILS.jquery_ui %}
+                'jQuery.ui': ['jQuery'],
+            {% endif %}
+            {% if lazy %}
+                'jQuery.fn.lazy': ['jQuery'],
+            {% endif %}
+        {% endblock %}
+
+        {% block fallback_ready %}
+            {{ block.super }}
+
+            {% if lazy %}
+                $(document).ready(function() {
+                    $("img.lazy").lazy();
+                });
+            {% endif %}
+        {% endblock %}
+    </script>
+{% else %}
+    {# TODO: handle non-fallback #}
+{% endif %}
