@@ -17,7 +17,7 @@
                     <tr>
                         <td>
                             <a href="{{ object.get_absolute_url }}">
-                                {{ object }}
+                                {% firstof object.get_str object %}
                             </a>
                         </td>
                     </tr>
