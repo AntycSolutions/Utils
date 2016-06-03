@@ -3,6 +3,7 @@
 {% load static %}
 {% load field_utils %}
 {% load template_utils %}
+{% load pipeline %}
 
 {% block title %} - Create {{ model_name|title }}{% endblock %}
 
@@ -15,11 +16,19 @@
         {% endif %}
 
         {% if css_url %}
-            css_url: "{{ css_url }}",
+            {% if settings.UTILS.pipeline %}
+                {% stylesheet css_url %}
+            {% else %}
+                css_url: "{{ css_url }}",
+            {% endif %}
         {% endif %}
 
         {% if js_url %}
-            js_url: "{{ js_url }}",
+            {% if settings.UTILS.pipeline %}
+                {% javascript js_url %}
+            {% else %}
+                js_url: "{{ js_url }}",
+            {% endif %}
         {% endif %}
 
         {% with css_dict=form.media|get_attr:"_css" %}

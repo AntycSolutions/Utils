@@ -10,21 +10,23 @@
         <script async src="//cdnjs.cloudflare.com/ajax/libs/fallback/1.1.8/fallback.min.js" type="text/javascript" onload="load_fallback();" onerror="fallback_fallback();"></script>
         <script type="text/javascript">
             function fallback_fallback() {
-                var fallback_script = document.createElement('script');
-                fallback_script.type = "text/javascript";
-                fallback_script.src = "{% static 'utils/js/fallback.min.js' %}";
-                fallback_script.onload = load_fallback; // IE 8+
-                fallback_script.onerror = function() {
-                    window.alert(
-                        'Failed to load required resource (FallbackJS), please refresh the page or contact an administrator ('
-                        {% for admin in settings.ADMINS %}
-                            + '{{ admin.1 }}'
-                        {% endfor %}
-                        + ')'
-                    );
+                if (typeof fallback === 'undefined') {
+                    var fallback_script = document.createElement('script');
+                    fallback_script.type = "text/javascript";
+                    fallback_script.src = "{% static 'utils/js/fallback.min.js' %}";
+                    fallback_script.onload = load_fallback; // IE 8+
+                    fallback_script.onerror = function() {
+                        window.alert(
+                            'Failed to load required resource (FallbackJS), please refresh the page or contact an administrator ('
+                            {% for admin in settings.ADMINS %}
+                                + '{{ admin.1 }}'
+                            {% endfor %}
+                            + ')'
+                        );
+                    }
+                    var head = document.head; // IE 9+
+                    head.appendChild(fallback_script);
                 }
-                var head = document.head; // IE 9+
-                head.appendChild(fallback_script);
             }
 
             function load_fallback() {

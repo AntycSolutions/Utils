@@ -1,0 +1,6 @@
+
+{% if settings.DEBUG %}
+    {{ fallback_key }}: '{{ url }}',
+{% else %}
+    '{{ url|slugify }}': '{{ url }}',
+{% endif %}
