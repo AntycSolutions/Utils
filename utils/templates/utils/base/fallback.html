@@ -1,13 +1,16 @@
 {% extends 'utils/base/html_base.html' %}
 
 {% load static %}
+{% load template_utils %}
 
 {% block head_scripts %}
     {{ block.super }}
 
+    {% get_app_settings 'utils' as utils_settings %}
+
     {% if settings.UTILS.fallback %}
         {# fallback js #}
-        <script async src="//cdnjs.cloudflare.com/ajax/libs/fallback/1.1.8/fallback.min.js" type="text/javascript" onload="load_fallback();" onerror="fallback_fallback();"></script>
+        <script async src="//cdnjs.cloudflare.com/ajax/libs/fallback/{{ utils_settings.VERSIONS.fallback_js }}/fallback.min.js" type="text/javascript" onload="load_fallback();" onerror="fallback_fallback();"></script>
         <script type="text/javascript">
             function fallback_fallback() {
                 if (typeof fallback === 'undefined') {

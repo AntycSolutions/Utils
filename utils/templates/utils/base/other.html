@@ -1,6 +1,9 @@
 {% extends 'utils/base/bootstrap.html' %}
 
 {% load static %}
+{% load template_utils %}
+
+{% get_app_settings 'utils' as utils_settings %}
 
 {% if settings.UTILS.fallback %}
     <script type="text/javascript">
@@ -9,26 +12,26 @@
 
             {% if settings.UTILS.font_awesome %}
                 font_awesome_css: [
-                    '//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css',
+                    '//maxcdn.bootstrapcdn.com/font-awesome/{{ utils_settings.VERSIONS.font_awesome }}/css/font-awesome.min.css',
                     "{% static 'utils/css/font-awesome.min.css' %}"
                 ],
             {% endif %}
 
             {% if settings.UTILS.jquery_ui %}
                 jquery_ui_smoothness_css: [
-                    '//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.min.css',
+                    '//code.jquery.com/ui/{{ utils_settings.VERSIONS.jquery_ui_css }}/themes/smoothness/jquery-ui.min.css',
                     "{% static 'utils/css/jquery-ui.min.css' %}"
                 ],
 
                 'jQuery.ui': [
-                    '//code.jquery.com/ui/1.11.4/jquery-ui.min.js',
+                    '//code.jquery.com/ui/{{ utils_settings.VERSIONS.jquery_ui_js }}/jquery-ui.min.js',
                     "{% static 'utils/js/jquery-ui.min.js' %}"
                 ],
             {% endif %}
 
             {% if lazy %}
                 'jQuery.fn.lazy': [
-                    '//cdn.jsdelivr.net/jquery.lazy/0.5.3/jquery.lazy.min.js',
+                    '//cdn.jsdelivr.net/jquery.lazy/{{ utils_settings.VERSIONS.jquery_lazy_js }}/jquery.lazy.min.js',
                     "{% static 'utils/js/jquery.lazy.min.js' %}"
                 ],
             {% endif %}
