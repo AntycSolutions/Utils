@@ -1,12 +1,9 @@
 {% extends 'utils/base/html_base.html' %}
 
 {% load static %}
-{% load template_utils %}
 
 {% block head_scripts %}
     {{ block.super }}
-
-    {% get_app_settings 'utils' as utils_settings %}
 
     {% if settings.UTILS.fallback %}
         {# fallback js #}

@@ -1,9 +1,6 @@
 {% extends 'utils/base/fallback.html' %}
 
 {% load static %}
-{% load template_utils %}
-
-{% get_app_settings 'utils' as utils_settings %}
 
 {% if settings.UTILS.bootstrap3 %}
     {% block meta %}
