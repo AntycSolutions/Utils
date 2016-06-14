@@ -2,9 +2,12 @@ import os
 import urllib
 
 from django.conf import settings
-from django import http
+from django import http, template
+from django.template import loader
 from django.views.generic import edit
 from django.forms import models
+from django.views.decorators import csrf
+from django.views import defaults
 
 
 def _get_exif(filename):
@@ -224,3 +227,27 @@ class InlineFormSetUpdateView(edit.UpdateView):
 
 def raise_exception(request):
     raise Exception('Intentional error: raise_exception')
+
+
+@csrf.requires_csrf_token
+def server_error(request, template_name='500.html'):
+    """
+    500 error handler.
+
+    Templates: :template:`500.html`
+    Context: None (switched to RequestContext so we can load css)
+    """
+    try:
+        _template = loader.get_template(template_name)
+    except template.TemplateDoesNotExist:
+        if template_name != '500.html':
+            # Reraise if it's a missing custom template.
+            raise
+
+        return http.HttpResponseServerError(
+            '<h1>Server Error (500)</h1>', content_type='text/html'
+        )
+
+    return http.HttpResponseServerError(
+        _template.render(template.RequestContext(request))
+    )
