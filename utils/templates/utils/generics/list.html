@@ -27,7 +27,7 @@
     {% include 'utils/snippets/messages.html' %}
     <div>
         {% for create in create_list %}
-            <a href="{{ create.url }}" class="btn btn-primary">
+            <a href="{{ create.url }}" class="btn btn-primary inline">
                 Create {{ create.indefinite_article }} {{ create.model_name|title }}
             </a>
         {% empty %}
@@ -39,13 +39,13 @@
     <br />
     <form method="GET" class="form-inline">
         {% if search %}
-            <div class="form-group">
+            <div class="form-group inline">
                 <input type="text" class="form-control search-query" name="q" placeholder="{{ model_name|title }} Search" value="{{ q }}" />
             </div>
         {% endif %}
         {% for name, select in selects.items %}
-            <div class="form-group">
-                <label for="{{ name }}" class="control-label">
+            <div class="form-group inline">
+                <label for="{{ name }}" class="control-label inline">
                     {{ select.label }}:
                 </label>
                 <select id="{{ name }}" name="{{ name }}" class="form-control">
@@ -59,10 +59,10 @@
             </div>
         {% endfor %}
         {% if datesearch %}
-            <div class="form-group">
+            <div class="form-group inline">
                 <input type="text" id="dateFromSearchBox" class="form-control search-query datepicker" name="df" placeholder="Date From" value="{{ df }}" />
             </div>
-            <div class="form-group">
+            <div class="form-group inline">
                 <input type="text" id="dateToSearchBox" class="form-control search-query datepicker" name="dt" placeholder="Date To" value="{{ dt }}" />
             </div>
         {% endif %}
@@ -95,7 +95,7 @@
                     Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
                 </span>
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% for name, select in selects.items %}&{{ name }}={% for option in select.options %}{% if option.selected %}{{ option.value }}{% endif %}{% endfor %}{% endfor %}{% if df %}&df={{ df }}{% endif %}{% if dt %}&dt={{ dt }}{% endif %}" class="btn btn-default">
+                    <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% for name, select in selects.items %}&{{ name }}={% for option in select.options %}{% if option.selected %}{{ option.value }}{% endif %}{% endfor %}{% endfor %}{% if df %}&df={{ df }}{% endif %}{% if dt %}&dt={{ dt }}{% endif %}" class="btn btn-default inline">
                         Next
                     </a>
                 {% endif %}
