@@ -77,20 +77,23 @@
                 {{ block.super }}
 
                 function responsive_btn_group() {
-                    $('.btn-group').each(function() {
+                    var btn_group = 'btn-group';
+                    var btn_group_vertical = 'btn-group-vertical';
+                    var selector = (
+                        '.' + btn_group + ', .' + btn_group_vertical
+                    );
+                    $(selector).each(function() {
                         var $this = $(this);
                         var width = 0;
                         $this.find('.btn').each(function() {
                             width += $(this).width();
                         });
-                        var btn_group = 'btn-group';
-                        var btn_group_vertical = 'btn-group-vertical';
                         if (width > $(window).width()) {
                             $this.removeClass(btn_group);
                             $this.addClass(btn_group_vertical);
                         } else {
-                            $this.addClass(btn_group);
                             $this.removeClass(btn_group_vertical);
+                            $this.addClass(btn_group);
                         }
                     });
                 }
