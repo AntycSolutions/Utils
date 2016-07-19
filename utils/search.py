@@ -5,8 +5,11 @@ from django.utils import timezone
 from django.db.models import Q
 
 
-def normalize_query(query_string, normspace=re.compile(r'\s{2,}').sub,
-                    findterms=re.compile(r'"([^"]+)"|(\S+)').findall):
+def normalize_query(
+    query_string,
+    normspace=re.compile(r'\s{2,}').sub,
+    findterms=re.compile(r'"([^"]+)"|(\S+)').findall
+):
     """Splits the query string in invidual keywords.
 
     Gets rid of unecessary spaces and grouping quoted words together.
@@ -17,8 +20,10 @@ def normalize_query(query_string, normspace=re.compile(r'\s{2,}').sub,
     ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
 
     """
-    return [normspace(' ',
-                      (t[0] or t[1]).strip()) for t in findterms(query_string)]
+    return [
+        normspace(' ', (t[0] or t[1]).strip())
+        for t in findterms(query_string)
+    ]
 
 
 def get_query(query_string, search_fields, exact=False):
@@ -48,8 +53,9 @@ def get_query(query_string, search_fields, exact=False):
     return query
 
 
-def get_date_query(query_date_from_string, query_date_to_string,
-                   search_fields):
+def get_date_query(
+    query_date_from_string, query_date_to_string, search_fields
+):
     """Returns a query, that is a range of Q objects.
 
     That combination aims to search keywords within a model
@@ -59,10 +65,12 @@ def get_date_query(query_date_from_string, query_date_to_string,
     query = None  # Query to search for every search term
     if query_date_from_string:
         try:
-            date_from = datetime.strptime(str(query_date_from_string),
-                                          '%m/%d/%Y')
-            term_from = timezone.make_aware(date_from,
-                                            timezone.get_current_timezone())
+            date_from = datetime.strptime(
+                str(query_date_from_string), '%m/%d/%Y'
+            )
+            term_from = timezone.make_aware(
+                date_from, timezone.get_current_timezone()
+            )
         except:
             return None
     else:
@@ -70,8 +78,9 @@ def get_date_query(query_date_from_string, query_date_to_string,
     if query_date_to_string:
         try:
             date_to = datetime.strptime(str(query_date_to_string), '%m/%d/%Y')
-            term_to = timezone.make_aware(date_to,
-                                          timezone.get_current_timezone())
+            term_to = timezone.make_aware(
+                date_to, timezone.get_current_timezone()
+            )
         except:
             return None
     else:

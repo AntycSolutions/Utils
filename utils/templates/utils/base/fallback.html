@@ -2,6 +2,29 @@
 
 {% load static %}
 
+{% block styles %}
+    {{ block.super }}
+
+    {% if settings.UTILS.fallback %}
+        <style type="text/css">
+            #overlay {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background:
+                    white
+                    url({% static 'utils/imgs/ajax-loader.gif' %})
+                    no-repeat
+                    center
+                ;
+                z-index: 1031; {# above bootstrap static navbar #}
+            }
+        </style>
+    {% endif %}
+{% endblock %}
+
 {% block head_scripts %}
     {{ block.super }}
 
@@ -34,12 +57,14 @@
                     // css/js
                     {
                         {% block fallback_load %}
-                            // css
-                            // key/str: list of str/str
+                            /*
+                                css
+                                key/str: list of str/str
 
-                            // js
-                            // THE KEY MUST BE THE LIBRARIES WINDOW VARIABLE!
-                            // key/str: list of str/str
+                                js
+                                THE KEY MUST BE THE LIBRARIES WINDOW VARIABLE!
+                                key/str: list of str/str
+                            */
                         {% endblock %}
                     },
                     // options
@@ -52,10 +77,22 @@
                     }
                 );
 
-                // fallback.ready(['jQuery'], function() {
-                // });
+                /*
+                    fallback.ready(['jQuery'], function() {
+                    });
+                */
+
+                {% if settings.UTILS.bootstrap3 %}
+                    fallback.ready(['bootstrap_css'], function() {
+                        var overlay = document.getElementById('overlay');
+                        overlay.style.display = 'none';
+                    });
+                {% endif %}
 
                 fallback.ready(function() {
+                    var overlay = document.getElementById('overlay');
+                    overlay.style.display = 'none';
+
                     {% block fallback_ready %}
                         // internal js
                     {% endblock %}
@@ -63,4 +100,4 @@
             }
         </script>
     {% endif %}
-{% endblock %}
+{% endblock head_scripts %}

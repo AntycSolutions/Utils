@@ -18,6 +18,10 @@
         {% block head_scripts %}{% endblock %}
     </head>
     <body itemscope itemtype="http://schema.org/WebPage">
+        {% if settings.UTILS.fallback %}
+            <div id='overlay'></div>
+        {% endif %}
+
         {% block body %}{% endblock %}
 
         <noscript>
