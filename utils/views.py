@@ -112,7 +112,9 @@ def get_thumbnail(request, width, height, url):
     media_url = settings.MEDIA_URL
     partial_path = decoded_url.replace(media_url, "")
     path = os.path.join(media_root, partial_path)
-    thumbnail = _rescale(path, width, height, force=False)
+    thumbnail = None
+    if os.path.isfile(path):
+        thumbnail = _rescale(path, width, height, force=False)
 
     response = http.HttpResponse(thumbnail, 'image/jpeg')
 
