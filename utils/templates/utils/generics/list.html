@@ -40,7 +40,7 @@
     <form method="GET" class="form-inline">
         {% if search %}
             <div class="form-group inline">
-                <input type="text" class="form-control search-query" name="q" placeholder="{{ model_name|title }} Search" value="{{ q }}" />
+                <input type="text" class="form-control search-query" name="q" placeholder="{{ model_name|title }} Search" value="{{ q }}" autofocus />
             </div>
         {% endif %}
         {% for name, select in selects.items %}
