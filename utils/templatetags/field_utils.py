@@ -49,6 +49,11 @@ def is_checkbox(widget):
     return isinstance(widget, widgets.CheckboxInput)
 
 
+@register.filter
+def is_checkboxmultiple(widget):
+    return isinstance(widget, widgets.CheckboxSelectMultiple)
+
+
 # model
 
 @register.filter
@@ -76,3 +81,8 @@ def is_fileset(field):
 @register.filter
 def is_textfield(field):
     return isinstance(field, models.TextField)
+
+
+@register.filter
+def is_btn(field):
+    return isinstance(field, model_utils.FieldList.PseudoBtn)

@@ -29,8 +29,6 @@
     {{ block.super }}
 
     {% if settings.UTILS.fallback %}
-        {# fallback js #}
-        <script async src="//cdnjs.cloudflare.com/ajax/libs/fallback/{{ utils_settings.VERSIONS.fallback_js }}/fallback.min.js" type="text/javascript" onload="load_fallback();" onerror="fallback_fallback();"></script>
         <script type="text/javascript">
             function fallback_fallback() {
                 if (typeof fallback === 'undefined') {
@@ -49,6 +47,11 @@
                     }
                     var head = document.head; // IE 9+
                     head.appendChild(fallback_script);
+                }
+                else {
+                    console.log(
+                        'fallbackjs could not be loaded but is defined'
+                    );
                 }
             }
 
@@ -85,19 +88,31 @@
                 {% if settings.UTILS.bootstrap3 %}
                     fallback.ready(['bootstrap_css'], function() {
                         var overlay = document.getElementById('overlay');
-                        overlay.style.display = 'none';
+                        if (overlay) {
+                            overlay.style.display = 'none';
+                        }
                     });
                 {% endif %}
 
                 fallback.ready(function() {
                     var overlay = document.getElementById('overlay');
-                    overlay.style.display = 'none';
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                    }
 
                     {% block fallback_ready %}
                         // internal js
                     {% endblock %}
                 });
             }
+        </script>
+        {# fallback js #}
+        <script async
+                src="//cdnjs.cloudflare.com/ajax/libs/fallback/{{ utils_settings.VERSIONS.fallback_js }}/fallback.min.js"
+                type="text/javascript"
+                onload="load_fallback();"
+                onerror="fallback_fallback();"
+        >
         </script>
     {% endif %}
 {% endblock head_scripts %}

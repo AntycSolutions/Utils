@@ -15,6 +15,8 @@
                                 <th style="width: 30%;">
                                     {{ field_value.field.verbose_name|capfirst }}
                                 </th>
+                            {% elif field_value.field|is_btn %}
+                                <th></th>
                             {% else %}
                                 <th>
                                     {{ field_value.field.verbose_name|capfirst }}
@@ -31,7 +33,7 @@
                             {% if name in hidden_fields %}
                                 <!-- empty -->
                             {% elif field_value.field.name == "id" %}
-                                <style>
+                                <style style="text/css">
                                     .crud:not(:last-child) {
                                         width: 75px;
                                         margin-bottom: 5px;
@@ -41,17 +43,26 @@
                                     }
                                 </style>
                                 <td style="width: 91px;"><!-- from computed when width < 91 -->
-                                    <a class="btn btn-info crud" href="{% url model_name|add:'_detail' field_value.value %}">
-                                        View
-                                    </a>
-                                    <br />
-                                    <a href="{% url model_name|add:'_update' field_value.value %}" class="btn btn-default crud">
-                                        Update
-                                    </a>
-                                    <br />
-                                    <a href="{% url model_name|add:'_delete' field_value.value %}" class="btn btn-danger crud">
-                                        Delete
-                                    </a>
+                                    {% if not disable_detail %}
+                                        <a href="{% url model_name|add:'_detail' field_value.value %}"
+                                                class="btn btn-info crud">
+                                            View
+                                        </a>
+                                        <br />
+                                    {% endif %}
+                                    {% if not disable_update %}
+                                        <a href="{% url model_name|add:'_update' field_value.value %}"
+                                                class="btn btn-default crud">
+                                            Update
+                                        </a>
+                                        <br />
+                                    {% endif %}
+                                    {% if not disable_delete %}
+                                        <a href="{% url model_name|add:'_delete' field_value.value %}"
+                                                class="btn btn-danger crud">
+                                            Delete
+                                        </a>
+                                    {% endif %}
                                 </td>
                             {% elif field_value.field|is_image %}
                                 <td>
@@ -76,15 +87,26 @@
                                     {% endwith %}
                                 </td>
                             {% elif field_value.field|is_textfield %}
-                                <td style="widtH: 30%;">
+                                <td style="width: 30%;">
                                     {{ field_value.value }}
                                 </td>
                             {% elif name in object.money_fields %}
                                 <td>
                                     ${{ field_value.value }}
                                 </td>
-                            {% else %}
+                            {% elif field_value.field|is_btn %}
                                 <td>
+                                    <button type="button"
+                                            class="btn btn-default"
+                                            data-toggle="modal"
+                                            data-target="#{{ model_name }}_modal"
+                                            data-pk="{{ object.pk }}"
+                                            data-model-name="{{ model_name }}">
+                                        {{ field_value.field.verbose_name }}
+                                    </button>
+                                </td>
+                            {% else %}
+                                <td id="{{ model_name }}_{{ object.pk }}_{{ name }}">
                                     {{ field_value.value }}
                                 </td>
                             {% endif %}
