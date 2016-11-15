@@ -1,2 +1,11 @@
+{% load template_utils %}
 
-'{{ fallback_key }}': '{{ url }}',
+{% if not settings.PIPELINE_ENABLED %}
+    {% if debug_fallback_keys %}
+        '{{ debug_fallback_keys|get_item:url }}': '{{ url }}',
+    {% else %}
+        '{{ url|slugify }}': '{{ url }}',
+    {% endif %}
+{% else %}
+    '{{ fallback_key }}': '{{ url }}',
+{% endif %}
