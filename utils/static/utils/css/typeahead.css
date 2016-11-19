@@ -30,7 +30,9 @@
 }
 
 .tt-hint {
-    color: #999
+    color: #999;
+    /* bootstrap overrides display in inline forms */
+    display: none !important;
 }
 
 .tt-menu {

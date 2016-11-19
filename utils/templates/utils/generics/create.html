@@ -127,8 +127,8 @@
                     yearRange: year_range,
                 });
 
-                if (typeof add_form_callback === 'function') {
-                    add_form_callback($(form), form_count);
+                if (typeof formset_add_form_callback === 'function') {
+                    formset_add_form_callback($(form), form_count);
                 }
 
                 // one parent is col, second parent is form-group
@@ -139,8 +139,8 @@
             });
 
             {% for form in formset %}
-                if (typeof add_form_callback === 'function') {
-                    add_form_callback(
+                if (typeof formset_add_form_callback === 'function') {
+                    formset_add_form_callback(
                         $('#{{ forloop.counter0 }}_{{ inline_model_name|slugify }}_form'),
                         {{ forloop.counter0 }}
                     );
@@ -150,6 +150,10 @@
             {# file input formatting #}
             $('<br />').insertBefore('.btn-file input[type=checkbox]');
             $('.btn-file label').css('margin-bottom', '0px');
+
+            if (typeof form_callback === 'function') {
+                form_callback($('#create_{{ model_name|slugify }}_form'));
+            }
         });
     {% endblock %}
 </script>
@@ -162,7 +166,8 @@
 
     {% include 'utils/snippets/messages.html' %}
 
-    <form id="create_{{ model_name }}_form" class="form-horizontal" method="POST" enctype="{{ form_type }}">
+    <form id="create_{{ model_name|slugify }}_form"
+            class="form-horizontal" method="POST" enctype="{{ form_type }}">
         {% csrf_token %}
         <div class="row">
             <fieldset class="col-lg-6">

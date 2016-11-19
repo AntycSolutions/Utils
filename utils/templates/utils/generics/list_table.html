@@ -98,10 +98,16 @@
                                 <td>
                                     <button type="button"
                                             class="btn btn-default"
-                                            data-toggle="modal"
-                                            data-target="#{{ model_name }}_modal"
-                                            data-pk="{{ object.pk }}"
-                                            data-model-name="{{ model_name }}">
+                                            {% if field_value.type == 'modal' %}
+                                                data-toggle="modal"
+                                                data-target="#{{ model_name }}_modal"
+                                                data-pk="{{ object.pk }}"
+                                                data-model-name="{{ model_name }}"
+                                            {% endif %}
+                                            {% for attr, val in field_value.field.attrs.items %}
+                                                {{ attr }}="{{ val }}"
+                                            {% endfor %}
+                                            >
                                         {{ field_value.field.verbose_name }}
                                     </button>
                                 </td>

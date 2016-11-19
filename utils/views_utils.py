@@ -1,8 +1,10 @@
 from django import shortcuts, http
 from django.contrib import messages
 from django.core import paginator
+from django.db import models
 
 from utils.search import get_date_query
+from utils import search
 
 
 def _date_search(request, fields, model, queryset=None):
@@ -59,6 +61,46 @@ def _date_search(request, fields, model, queryset=None):
             )
 
     return queryset
+
+
+# the newer and better date search but we need the old one for compat
+def _get_date_filter(
+    request, context, df, dt, date_fields
+):
+    query = models.Q()
+    GET = request.GET
+    has_df = (df in GET) and GET[df].strip()
+    has_dt = (dt in GET) and GET[dt].strip()
+    if has_df and has_dt:
+        query_date_from_string = GET[df]
+        query_date_to_string = GET[dt]
+        context[df] = query_date_from_string
+        context[dt] = query_date_to_string
+        query = search.get_date_query(
+            query_date_from_string, query_date_to_string, date_fields
+        )
+    elif has_df:
+        query_date_from_string = GET[df]
+        context[df] = query_date_from_string
+        query = search.get_date_query(
+            query_date_from_string, None, date_fields
+        )
+    elif has_dt:
+        query_date_to_string = GET[dt]
+        context[dt] = query_date_to_string
+        query = search.get_date_query(
+            None, query_date_to_string, date_fields
+        )
+
+    if query is None:
+        query = models.Q()
+        messages.add_message(
+            request,
+            messages.WARNING,
+            "Invalid date. Please use MM/DD/YYYY."
+        )
+
+    return query
 
 
 def _get_paginate_by(request, rows_per_page_var):
