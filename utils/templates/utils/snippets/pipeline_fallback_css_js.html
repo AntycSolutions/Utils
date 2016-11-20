@@ -1,6 +1,8 @@
 {% load template_utils %}
 
-{% if not settings.PIPELINE_ENABLED and debug_fallback_keys %}
+{% get_app_settings 'pipeline' as pipeline_settings %}
+
+{% if not pipeline_settings.settings.PIPELINE_ENABLED and debug_fallback_keys %}
     '{{ debug_fallback_keys|get_item:url }}': '{{ url }}',
 {% else %}
     '{{ fallback_key }}': '{{ url }}',

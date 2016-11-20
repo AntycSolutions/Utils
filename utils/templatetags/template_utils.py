@@ -17,6 +17,9 @@ def get_item(dict_, key):
 
 @register.assignment_tag
 def get_app_settings(app_name):
-    app = importlib.import_module(app_name + '.settings')
+    try:
+        app = importlib.import_module(app_name + '.settings')
+    except ImportError:
+        app = importlib.import_module(app_name + '.conf')
 
     return app
