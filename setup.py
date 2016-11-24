@@ -8,7 +8,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-utils',
-    version='0.8.9',  # major.minor[.patch]
+    version='0.8.10',  # major.minor[.patch]
     packages=['utils'],
     install_requires=['django'],
     include_package_data=True,

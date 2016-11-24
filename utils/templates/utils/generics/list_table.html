@@ -98,7 +98,7 @@
                                 <td>
                                     <button type="button"
                                             class="btn btn-default"
-                                            {% if field_value.type == 'modal' %}
+                                            {% if field_value.field.type == 'modal' %}
                                                 data-toggle="modal"
                                                 data-target="#{{ model_name }}_modal"
                                                 data-pk="{{ object.pk }}"
