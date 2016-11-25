@@ -1,0 +1,36 @@
+
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}{{ page_var|default:'page' }}={{ page_obj.previous_page_number }}"
+                    class="btn btn-default">
+                Previous
+            </a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}{{ page_var|default:'page' }}={{ page_obj.next_page_number }}"
+                    class="btn btn-default inline">
+                Next
+            </a>
+        {% endif %}
+    </span>
+</div>
+
+<form method="GET" class="form-inline" style="display: inline-block;">
+    {% for key, value in request.GET.items %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}" />
+    {% endfor %}
+    <div class="form-group">
+        Rows per Page:
+        <input type="number"
+                name="{{ rows_per_page_var|default:'rows_per_page' }}"
+                class="form-control"
+                value="{{ rows_per_page }}" />
+    </div>
+    <button type="submit" class="btn">Paginate</button>
+</form>
