@@ -17,6 +17,12 @@ function getCookie(name) {
     return cookieValue;
 }
 var csrftoken = getCookie('csrftoken');
+if (csrftoken === null) {
+    csrftoken = $('input[name="csrfmiddlewaretoken"]').val();
+    if (csrftoken === null) {
+        console.log('No csrf token');
+    }
+}
 
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
