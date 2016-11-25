@@ -18,6 +18,7 @@
                 {% endfor %}
             {% endfor %}
         {% endwith %}
+
         {% for js in wizard.form.media|get_attr:"_js" %}
             'media_{{ forloop.counter0 }}_js': "{% static js %}",
         {% endfor %}
@@ -27,6 +28,15 @@
 <script type="text/javascript">
     {% block fallback_shim %}
         {{ block.super }}
+
+        {% with css_dict=wizard.form.media|get_attr:"_css" %}
+            {% for key, css_list in css_dict.items %}
+                // {{ key }}
+                {% for css in css_list %}
+                    'media_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}_css': 'bootstrap_css',
+                {% endfor %}
+            {% endfor %}
+        {% endwith %}
 
         {% for js in wizard.form.media|get_attr:"_js" %}
             'media_{{ forloop.counter0 }}_js': ['jQuery.fn.modal'],

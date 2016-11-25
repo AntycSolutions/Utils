@@ -39,6 +39,7 @@
                 {% endfor %}
             {% endfor %}
         {% endwith %}
+
         {% for js in form.media|get_attr:"_js" %}
             'media_{{ forloop.counter0 }}_js': "{% static js %}",
         {% endfor %}
@@ -55,8 +56,20 @@
     {% block fallback_shim %}
         {{ block.super }}
 
+        {% if css_url %}
+            {% if settings.UTILS.pipeline %}
+                {% pipeline_css_shim css_url 'bootstrap_css' %}
+            {% else %}
+                css_url: 'bootstrap_css',
+            {% endif %}
+        {% endif %}
+
         {% if js_url %}
-            js_url: ['jQuery'],
+            {% if settings.UTILS.pipeline %}
+                {% pipeline_js_shim js_url 'jQuery' %}
+            {% else %}
+                js_url: 'jQuery',
+            {% endif %}
         {% endif %}
 
         {% for js in form.media|get_attr:"_js" %}
