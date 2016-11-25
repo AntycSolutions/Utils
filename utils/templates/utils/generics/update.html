@@ -105,6 +105,8 @@
                 }
             }
 
+            window.generic_template = window.generic_template || {};
+
             $('#add_form').click(function() {
                 var form_count = $('#id_' + prefix + '-TOTAL_FORMS').val();
                 var form = document.getElementById(
@@ -139,8 +141,8 @@
             });
 
             {% for form in formset %}
-                if (typeof formset_add_form_callback === 'function') {
-                    formset_add_form_callback(
+                if ($.isFunction(generic_template.formset_add_form_callback)) {
+                    generic_template.formset_add_form_callback(
                         $('#{{ forloop.counter0 }}_{{ inline_model_name|slugify }}_form'),
                         {{ forloop.counter0 }}
                     );
@@ -151,8 +153,10 @@
             $('<br />').insertBefore('.btn-file input[type=checkbox]');
             $('.btn-file label').css('margin-bottom', '0px');
 
-            if (typeof form_callback === 'function') {
-                form_callback($('#update_{{ model_name|slugify }}_form'));
+            if ($.isFunction(generic_template.form_callback)) {
+                generic_template.form_callback(
+                    $('#update_{{ model_name|slugify }}_form')
+                );
             }
         });
     {% endblock %}
