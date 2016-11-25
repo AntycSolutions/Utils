@@ -85,14 +85,17 @@
                     });
                 */
 
-                {% if settings.UTILS.bootstrap3 %}
-                    fallback.ready(['bootstrap_css'], function() {
+                fallback.ready(
+                    [
+                        {% block fallback_overlay_libraries %}{% endblock %}
+                    ],
+                    function() {
                         var overlay = document.getElementById('overlay');
                         if (overlay) {
                             overlay.style.display = 'none';
                         }
-                    });
-                {% endif %}
+                    }
+                );
 
                 fallback.ready(function() {
                     var overlay = document.getElementById('overlay');

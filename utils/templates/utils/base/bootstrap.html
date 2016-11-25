@@ -73,6 +73,10 @@
                 {% endblock %}
             {% endblock %}
 
+            {% block fallback_overlay_libraries %}
+                'bootstrap_css',
+            {% endblock %}
+
             {% block fallback_ready %}
                 {{ block.super }}
 
