@@ -25,14 +25,12 @@
     {% for key, value in request.GET.items %}
         <input type="hidden" name="{{ key }}" value="{{ value }}" />
     {% endfor %}
-    <div class="form-group">
+    <div class="form-group inline">
         Rows per Page:
         <input type="number"
                 name="{{ rows_per_page_var|default:'rows_per_page' }}"
                 class="form-control"
                 value="{{ rows_per_page }}" />
     </div>
-    <button type="submit" class="btn">
-        Paginate
-    </button>
+    <button type="submit" class="btn">Paginate</button>
 </form>
