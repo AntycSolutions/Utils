@@ -84,9 +84,8 @@ def get_date_query(
                 date_from, timezone.get_current_timezone()
             )
         except ValueError as e:
-            # TODO: change to throwing exception DoesNotMatchFormat
-            # raise DoesNotMatchFormat(str(e))
-            return None  # query_date_from_string does not match date_format
+            # query_date_from_string does not match date_format
+            raise DoesNotMatchFormat(str(e))
     else:
         term_from = None
     if query_date_to_string:
@@ -100,9 +99,8 @@ def get_date_query(
                 date_to, timezone.get_current_timezone()
             )
         except ValueError as e:
-            # TODO: change to throwing exception DoesNotMatchFormat
-            # raise DoesNotMatchFormat(str(e))
-            return None  # query_date_to_string does not match date_format
+            # query_date_to_string does not match date_format
+            raise DoesNotMatchFormat(str(e))
     else:
         term_to = None
 
