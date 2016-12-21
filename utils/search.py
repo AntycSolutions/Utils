@@ -1,18 +1,20 @@
 import re
 from datetime import datetime
-from django.utils import timezone
 
-from django.db.models import Q
+from django.utils import timezone
+from django.db import models
 
 
 def normalize_query(
     query_string,
+    # replace whitespace that is 2 or more in length
     normspace=re.compile(r'\s{2,}').sub,
+    # find all words bounded by whitespace (group 1) or by quotes (group 0)
     findterms=re.compile(r'"([^"]+)"|(\S+)').findall
 ):
-    """Splits the query string in invidual keywords.
+    """Splits the query string in individual keywords.
 
-    Gets rid of unecessary spaces and grouping quoted words together.
+    Gets rid of unnecessary spaces and grouping quoted words together.
 
     Example:
 
@@ -20,87 +22,104 @@ def normalize_query(
     ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
 
     """
+
     return [
-        normspace(' ', (t[0] or t[1]).strip())
-        for t in findterms(query_string)
+        # replace whitespace that is 2 or more characters in length with
+        #  a single space
+        normspace(' ', (term[0] or term[1]).strip())
+        for term in findterms(query_string)
     ]
 
 
 def get_query(query_string, search_fields, exact=False):
-    """Returns a query, that is a combination of Q objects.
+    """Returns a query, that is a combination of exact or icontains Q objects.
 
     That combination aims to search keywords within a model
     by testing the given search fields.
 
     """
-    query = None  # Query to search for every search term
+
+    query = models.Q()  # Query to search for every search term
     terms = normalize_query(query_string)
     for term in terms:
-        or_query = None  # Query to search for a given term in each field
+        or_query = models.Q()  # Query to search for a given term in each field
         for field_name in search_fields:
             if exact:
-                q = Q(**{"%s" % field_name: term})
+                q = models.Q(**{"%s" % field_name: term})
             else:
-                q = Q(**{"%s__icontains" % field_name: term})
-            if or_query is None:
-                or_query = q
-            else:
-                or_query = or_query | q
-        if query is None:
-            query = or_query
-        else:
-            query = query & or_query
+                q = models.Q(**{"%s__icontains" % field_name: term})
+
+            or_query = or_query | q
+
+        query = query & or_query
+
     return query
 
 
-def get_date_query(
-    query_date_from_string, query_date_to_string, search_fields
-):
-    """Returns a query, that is a range of Q objects.
+class DoesNotMatchFormat(BaseException):
+    pass
 
-    That combination aims to search keywords within a model
+
+def get_date_query(
+    query_date_from_string,
+    query_date_to_string,
+    search_fields,
+    date_format='%m/%d/%Y'
+):
+    """Returns a query, that is a combination of range, lte or gte Q objects.
+
+    That combination aims to search dates within a model
     by testing the given search fields.
 
     """
-    query = None  # Query to search for every search term
+
     if query_date_from_string:
         try:
+            # parse datetime
             date_from = datetime.strptime(
-                str(query_date_from_string), '%m/%d/%Y'
+                str(query_date_from_string), date_format
             )
+            # make timezone aware
             term_from = timezone.make_aware(
                 date_from, timezone.get_current_timezone()
             )
-        except:
-            return None
+        except ValueError as e:
+            # TODO: change to throwing exception DoesNotMatchFormat
+            # raise DoesNotMatchFormat(str(e))
+            return None  # query_date_from_string does not match date_format
     else:
         term_from = None
     if query_date_to_string:
         try:
-            date_to = datetime.strptime(str(query_date_to_string), '%m/%d/%Y')
+            # parse datetime
+            date_to = datetime.strptime(
+                str(query_date_to_string), date_format
+            )
+            # make timezone aware
             term_to = timezone.make_aware(
                 date_to, timezone.get_current_timezone()
             )
-        except:
-            return None
+        except ValueError as e:
+            # TODO: change to throwing exception DoesNotMatchFormat
+            # raise DoesNotMatchFormat(str(e))
+            return None  # query_date_to_string does not match date_format
     else:
         term_to = None
 
-    or_query = None  # Query to search for a given term in each field
+    if not term_from and not term_to:
+        raise Exception('Please provide at least one date')
+
+    or_query = models.Q()  # Query to search for a given term in each field
     for field_name in search_fields:
         if term_from and term_to:
-            q = Q(**{"%s__range" % field_name: [term_from, term_to]})
+            q = models.Q(**{"%s__range" % field_name: [term_from, term_to]})
         elif term_from:
-            q = Q(**{"%s__gte" % field_name: term_from})
+            q = models.Q(**{"%s__gte" % field_name: term_from})
         elif term_to:
-            q = Q(**{"%s__lte" % field_name: term_to})
+            q = models.Q(**{"%s__lte" % field_name: term_to})
         else:
-            q = None
+            raise Exception('Please provide at least one date')
 
-        if or_query is None:
-            or_query = q
-        else:
-            or_query = or_query | q
-    query = or_query
+        or_query = or_query | q
 
-    return query
+    return or_query
