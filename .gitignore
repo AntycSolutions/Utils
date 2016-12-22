@@ -58,11 +58,12 @@ target/
 
 
 # Sqlite databases
-db.sqlite3
+*.sqlite3
 
 # Python
 .project
 .pydevproject
+*.pyc
 
 # Temporary files
 *~
@@ -70,6 +71,8 @@ db.sqlite3
 # Apple
 .DS_Store
 
-# Django
-media/*
-static/*
+# Vim
+*.swp
+
+# IntelliJ
+.idea/
