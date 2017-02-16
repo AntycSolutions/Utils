@@ -3,18 +3,26 @@ from django.contrib import messages
 from django.core import paginator
 
 
-def _get_paginate_by(request, rows_per_page_var):
-    paginate_by = 5
+def _get_paginate_by(request, rows_per_page_var, context=None):
+    paginate_by = 5  # default
+
     if request.session.get(rows_per_page_var, False):
+        # previous stored value
         paginate_by = request.session[rows_per_page_var]
-    if (rows_per_page_var in request.GET
-            and request.GET[rows_per_page_var].strip()):
-        paginate_by = request.GET[rows_per_page_var]
+
+    rows_per_page = request.GET.get(rows_per_page_var, '').strip()
+    if rows_per_page:
+        # new value
+        paginate_by = rows_per_page
         request.session[rows_per_page_var] = paginate_by
+
+    if context:
+        context[rows_per_page_var] = paginate_by
 
     return paginate_by
 
 
+# rows_per_page is usually the result of _get_paginate_by
 def _paginate(request, queryset, page_var, rows_per_page):
     page = request.GET.get(page_var)
     queryset_paginator = paginator.Paginator(queryset, rows_per_page)

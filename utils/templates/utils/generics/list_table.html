@@ -33,7 +33,7 @@
                             {% if name in hidden_fields %}
                                 <!-- empty -->
                             {% elif field_value.field.name == "id" %}
-                                <style style="text/css">
+                                <style type="text/css">
                                     .crud:not(:last-child) {
                                         width: 75px;
                                         margin-bottom: 5px;
@@ -98,6 +98,7 @@
                                 <td>
                                     <button type="button"
                                             class="btn btn-default"
+                                            id="{{ model_name }}_{{ object.pk }}_{{ name }}"
                                             {% if field_value.field.type == 'modal' %}
                                                 data-toggle="modal"
                                                 data-target="#{{ model_name }}_modal"
@@ -105,7 +106,8 @@
                                                 data-model-name="{{ model_name }}"
                                             {% endif %}
                                             {% for attr, val in field_value.field.attrs.items %}
-                                                {{ attr }}="{{ val }}"
+                                                {# single quotes enable json #}
+                                                {{ attr }}='{{ val }}'
                                             {% endfor %}
                                             >
                                         {{ field_value.field.verbose_name }}
