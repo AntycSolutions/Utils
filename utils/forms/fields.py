@@ -11,15 +11,25 @@ from utils.forms import widgets as utils_widgets
 class MultiFileField(forms.FileField):
     widget = utils_widgets.MultiFileInput
     default_error_messages = {
-        'min_num': _(u'Ensure at least %(min_num)s files are uploaded (received %(num_files)s).'),
-        'max_num': _(u'Ensure at most %(max_num)s files are uploaded (received %(num_files)s).'),
-        'file_size': _(u'File %(uploaded_file_name)s exceeded maximum upload size.'),
+        'min_num': _(
+            'Ensure at least %(min_num)s files are uploaded'
+            ' (received %(num_files)s).'
+        ),
+        'max_num': _(
+            'Ensure at most %(max_num)s files are uploaded'
+            ' (received %(num_files)s).'
+        ),
+        'file_size': _(
+            'File %(uploaded_file_name)s exceeded'
+            ' maximum upload size.'
+        ),
     }
 
     def __init__(self, *args, **kwargs):
         self.min_num = kwargs.pop('min_num', 0)
         self.max_num = kwargs.pop('max_num', None)
         self.maximum_file_size = kwargs.pop('max_file_size', None)
+
         super(MultiFileField, self).__init__(*args, **kwargs)
 
     def to_python(self, data):
@@ -38,18 +48,35 @@ class MultiFileField(forms.FileField):
         if len(data) and not data[0]:
             num_files = 0
         if num_files < self.min_num:
-            raise ValidationError(self.error_messages['min_num'] % {'min_num': self.min_num, 'num_files': num_files})
+            raise ValidationError(
+                self.error_messages['min_num'] % {
+                    'min_num': self.min_num, 'num_files': num_files
+                }
+            )
         elif self.max_num and num_files > self.max_num:
-            raise ValidationError(self.error_messages['max_num'] % {'max_num': self.max_num, 'num_files': num_files})
+            raise ValidationError(
+                self.error_messages['max_num'] % {
+                    'max_num': self.max_num, 'num_files': num_files
+                }
+            )
         for uploaded_file in data:
-            if self.maximum_file_size and uploaded_file.size > self.maximum_file_size:
-                raise ValidationError(self.error_messages['file_size'] % {'uploaded_file_name': uploaded_file.name})
+            has_exceeded_size = (
+                self.maximum_file_size and
+                uploaded_file.size > self.maximum_file_size
+            )
+            if has_exceeded_size:
+                raise ValidationError(
+                    self.error_messages['file_size'] % {
+                        'uploaded_file_name': uploaded_file.name
+                    }
+                )
 
     def _check_clear(self, data, initial):
         # If the widget got contradictory inputs, we raise a validation error
         if data is widgets.FILE_INPUT_CONTRADICTION:
-            raise ValidationError(self.error_messages['contradiction'],
-                                  code='contradiction')
+            raise ValidationError(
+                self.error_messages['contradiction'], code='contradiction'
+            )
         # False means the field value should be cleared; further validation is
         # not needed.
         if data is False:
@@ -71,13 +98,19 @@ class MultiFileField(forms.FileField):
     def clean(self, data, initial=None):
         cleaned_data = []
         LAST_DATUM = object()
-        both = itertools.zip_longest(data, initial, fillvalue=LAST_DATUM)
-        for datum, initial_datum in both:
-            if initial_datum is not LAST_DATUM:
-                cleaned_datum = self._check_clear(datum, initial_datum)
-                cleaned_data.append(cleaned_datum)
-            else:
-                cleaned_data.append(datum)
+        try:
+            both = itertools.zip_longest(data, initial, fillvalue=LAST_DATUM)
+        except TypeError:
+            # data or initial is not iterable
+            checked_data = self._check_clear(data, initial)
+            cleaned_data.append(checked_data)
+        else:
+            for datum, initial_datum in both:
+                if initial_datum is not LAST_DATUM:
+                    checked_datum = self._check_clear(datum, initial_datum)
+                    cleaned_data.append(checked_datum)
+                else:
+                    cleaned_data.append(datum)
 
         return cleaned_data
 
