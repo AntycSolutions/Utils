@@ -139,6 +139,10 @@
                     {% endfor %}
                 {% endif %}
             {% endif %}
+
+            {# file input formatting #}
+            $('<br />').insertBefore('.btn-file input[type=checkbox]');
+            $('.btn-file label').css('margin-bottom', '0px');
         });
     {% endblock %}
 </script>
@@ -153,6 +157,9 @@
     <form method="POST"
         {% if wizard.form.is_multipart or wizard.form.nested.is_multipart %}
             enctype="{{ form_type }}"
+        {% endif %}
+        {% if form_id %}
+            id="{{ form_id }}"
         {% endif %}
         class="form-horizontal"
             >
