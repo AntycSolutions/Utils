@@ -23,7 +23,7 @@ class MultiFileInput(widgets.FileInput):
 
 # renders only the file and clear checkbox (removes file upload input)
 #  used with ConfirmClearableFile/ConfirmClearableMultiFileMultiWidget
-#  could be used with ClearableMultiFileMultiWidget (needs creating)
+#  TODO: could be used with ClearableMultiFileMultiWidget
 class ClearableFile(widgets.ClearableFileInput):
     def value_from_datadict(self, data, files, widget_name):
         upload = files.get(widget_name)
@@ -192,6 +192,8 @@ class ConfirmClearableFile(
 ):
     pass
 
+# TODO:
+# class ClearableMultiFileMultiWidget(widgets.MultiWidget):
 
 # a MultiWidget where each existing file is a ConfirmClearableFile and
 #  new files are handled by MultiFileInput
