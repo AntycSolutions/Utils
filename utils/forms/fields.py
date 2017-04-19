@@ -2,7 +2,7 @@ import itertools
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as trans
 
 from utils.forms import widgets as utils_widgets
 
@@ -12,15 +12,15 @@ class MultiFileField(forms.FileField):
     #  ConfirmClearableMultiFileMultiWidget
     widget = utils_widgets.MultiFileInput
     default_error_messages = {
-        'min_num': _(
+        'min_num': trans(
             'Ensure at least %(min_num)s files are uploaded'
             ' (received %(num_files)s).'
         ),
-        'max_num': _(
+        'max_num': trans(
             'Ensure at most %(max_num)s files are uploaded'
             ' (received %(num_files)s).'
         ),
-        'file_size': _(
+        'file_size': trans(
             'File %(uploaded_file_name)s exceeded'
             ' maximum upload size.'
         ),
