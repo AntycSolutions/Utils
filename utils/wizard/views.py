@@ -60,7 +60,11 @@ class FileStorageNamedUrlSessionWizardView(
         files = {}
 
         field_regexes = []
-        fields = self.form_list[self.steps.current].base_fields
+        form_class = self.form_list[self.steps.current]
+        fields = {}
+        if hasattr(form_class, 'base_fields'):
+            fields = form_class.base_fields
+        # else:  # TODO: handle FormSets
         for field_name, field in fields.items():
             if isinstance(field, utils_fields.MultiFileField):
                 # get file from widget (<step>-<field_name>_<#>)
