@@ -1,4 +1,3 @@
-from django.utils import datastructures
 from django.utils import six
 from django.core.files import uploadedfile
 
@@ -15,29 +14,19 @@ class MultiFileSessionStorage(session.SessionStorage):
         if step not in self.data[self.step_files_key]:
             self.data[self.step_files_key][step] = {}
 
-        if isinstance(files, datastructures.MultiValueDict):
-            for idx, field in enumerate(files):
-                field_files = files.getlist(field)
+        for field, field_file in six.iteritems(files or {}):
+            if isinstance(field_file, list):
+                field_files = field_file
                 file_list = []
                 for field_file in field_files:
                     file_dict = self._tmp_save(field_file)
                     file_list.append(file_dict)
+                file_value = file_list
+            else:
+                file_dict = self._tmp_save(field_file)
+                file_value = file_dict
 
-                self.data[self.step_files_key][step][field] = file_list
-        else:
-            for field, field_file in six.iteritems(files or {}):
-                if isinstance(field_file, list):
-                    field_files = field_file
-                    file_list = []
-                    for field_file in field_files:
-                        file_dict = self._tmp_save(field_file)
-                        file_list.append(file_dict)
-                    file_value = file_list
-                else:
-                    file_dict = self._tmp_save(field_file)
-                    file_value = file_dict
-
-                self.data[self.step_files_key][step][field] = file_value
+            self.data[self.step_files_key][step][field] = file_value
 
     def _tmp_save(self, field_file):
         file_storage = self.file_storage
