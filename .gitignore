@@ -76,3 +76,6 @@ target/
 
 # IntelliJ
 .idea/
+
+# user uploaded from tests
+tests/media/*
