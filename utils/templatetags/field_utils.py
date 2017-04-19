@@ -20,13 +20,23 @@ def is_number(widget):
 
 
 @register.filter
-def is_file(widget):
+def is_clearable_file(widget):
     if hasattr(widget, 'widgets'):
         for widget in widget.widgets:
             if isinstance(widget, widgets.ClearableFileInput):
                 return True
 
     return isinstance(widget, widgets.ClearableFileInput)
+
+
+@register.filter
+def is_file(widget):
+    if hasattr(widget, 'widgets'):
+        for widget in widget.widgets:
+            if isinstance(widget, widgets.FileInput):
+                return True
+
+    return isinstance(widget, widgets.FileInput)
 
 
 @register.filter
