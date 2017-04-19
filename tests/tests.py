@@ -455,6 +455,7 @@ class MultiFileFieldTests(test.TestCase):
 
         test_file2 = uploadedfile.SimpleUploadedFile('file2.txt', b'content')
         test_file3 = uploadedfile.SimpleUploadedFile('file3.txt', b'content')
+        test_file4 = uploadedfile.SimpleUploadedFile('file4.txt', b'content')
 
         # submit first step
         response = self.client.post(
@@ -467,7 +468,8 @@ class MultiFileFieldTests(test.TestCase):
                 # ManagementForm
                 'create_user_wizard-current_step': 'userfiles',
                 # files
-                'userfiles-files_0': [test_file2, test_file3]  # subwidget name
+                # subwidget name
+                'userfiles-files_0': [test_file2, test_file3, test_file4]
             }
         )
         self.assertEqual(response.status_code, 302)
@@ -504,6 +506,10 @@ class MultiFileFieldTests(test.TestCase):
         )
         self.assertIn(
             'Pending: <a href="/media/temp/file3.txt">file3.txt</a>',
+            str(response.content)
+        )
+        self.assertIn(
+            'Pending: <a href="/media/temp/file4.txt">file4.txt</a>',
             str(response.content)
         )
 
@@ -559,11 +565,17 @@ class MultiFileFieldTests(test.TestCase):
         )
 
         files = tests_models.File.objects.filter(user__username='test2')
-        self.assertEqual(1, len(files))
+        self.assertEqual(2, len(files))
+        i = 0
         for file in files:
-            self.assertEqual(file.file.name, 'tests/file2.txt')
-            self.assertEqual(file.filename(), 'file2.txt')
+            if i == 0:
+                self.assertEqual(file.file.name, 'tests/file2.txt')
+                self.assertEqual(file.filename(), 'file2.txt')
+            elif i == 1:
+                self.assertEqual(file.file.name, 'tests/file4.txt')
+                self.assertEqual(file.filename(), 'file4.txt')
             self.assertEqual(str(file), file.filename())
+            i += 1
 
         # update first step
         response = self.client.post(
@@ -608,10 +620,12 @@ class MultiFileFieldTests(test.TestCase):
         response = self.client.get('/wizard/update/finished/')
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(
-            len(tests_models.File.objects.filter(user__username='test2')),
-            0
-        )
+        files = tests_models.File.objects.filter(user__username='test2')
+        self.assertEqual(1, len(files))
+        for file in files:
+            self.assertEqual(file.file.name, 'tests/file4.txt')
+            self.assertEqual(file.filename(), 'file4.txt')
+            self.assertEqual(str(file), file.filename())
 
     def test_multi_file_field_in_wizard_required(self):
         # load first step

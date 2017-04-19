@@ -39,6 +39,12 @@ class CreateUserWizard(
                     tests_models.File.objects.create(
                         file=_file, user=user
                     )
+                else:
+                    # no change
+                    # an empty continue is optimized away and coverage.py
+                    #  will mark it as unreached, so we noop instead
+                    _file
+                    continue
             elif _file is False:
                 if isinstance(initial_datum, uploadedfile.UploadedFile):
                     # form wizard files are temporarily uploaded
