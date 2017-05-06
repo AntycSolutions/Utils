@@ -3,6 +3,8 @@ from django.contrib import auth
 
 from utils.forms import fields as utils_fields, widgets as utils_widgets
 
+# TODO: create form that saves MultiFile
+
 
 class JustUserForm(forms.ModelForm):
     class Meta:
@@ -55,7 +57,7 @@ class WizardUserForm(forms.ModelForm):
                 if key == 'files':
                     _file_list = files.get(key)
                     for _file in _file_list:
-                        # /media/temp/ (CreateUserWizard.file_storage)
+                        # /media/temp/ (from CreateUserWizard.file_storage)
                         _file.url = '/media/temp/' + _file.name
                         file_list.append(_file)
         self.fields['files'].widget = (
@@ -83,13 +85,13 @@ class WizardUserFormRequired(forms.ModelForm):
             file.file for file in self.instance.file_set.all()
         ]
         files = kwargs.get('files', None)
-        if files:
+        if files:  # value can be set to None
             # temp files (UploadedFile) require attr url to be displayed
             for key in files:
-                if 'files' in key:
+                if 'files' == key:
                     _file_list = files.get(key)
                     for _file in _file_list:
-                        # /media/temp/ (CreateUserWizard.file_storage)
+                        # /media/temp/ (from CreateUserWizard.file_storage)
                         _file.url = '/media/temp/' + _file.name
                         file_list.append(_file)
         self.fields['files'].widget = (
