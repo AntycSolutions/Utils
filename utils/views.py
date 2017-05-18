@@ -7,7 +7,8 @@ from django.template import loader
 from django.views.generic import edit
 from django.forms import models
 from django.views.decorators import csrf
-from django.views import defaults
+from django.core import mail
+from django.contrib.auth import decorators
 
 
 def _get_exif(filename):
@@ -78,7 +79,7 @@ def _rescale(input_file, width, height, force=True):
     try:
         max_width = int(width)
         max_height = int(height)
-    except:
+    except TypeError:
         return None
 
     img = Image.open(input_file)
@@ -253,3 +254,23 @@ def server_error(request, template_name='500.html'):
     return http.HttpResponseServerError(
         _template.render(template.RequestContext(request))
     )
+
+
+@decorators.login_required
+def js_reporter(request):
+    if request.method == 'POST':
+        url = request.POST.get('url', '')
+        json = request.POST.get('json', '')
+
+        if url or json:
+            mail.mail_admins(
+                'JS Issue',
+                'url: {}\n\njson:\n\n{}\n',
+                html_message=(
+                    'url: {}<br><br>json:<br><br><code>{}</code><br>'.format(
+                        url, json
+                    )
+                )
+            )
+
+    return http.JsonResponse({})
