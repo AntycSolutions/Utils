@@ -1,16 +1,23 @@
 {% load field_utils %}
 {% load update_attrs %}
 
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}
+
 <div class="col-lg-9 col-lg-offset-3">
     <p>
         Fields marked with * are required
     </p>
 </div>
-{{ form.non_field_errors }}
+
 {% for hidden in form.hidden_fields %}
     {{ hidden.errors }}
     {{ hidden }}
 {% endfor %}
+
 {% for field in form.visible_fields %}
     <div class="form-group{% if field.errors %} has-error{% endif %}">
         <label class="col-lg-3 control-label" for="{{ field.auto_id }}">
