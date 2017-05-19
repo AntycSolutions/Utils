@@ -75,7 +75,7 @@
                                     {% endif %}
                                 </td>
                             {% elif field_value.field|is_foreignkey %}
-                                <td>
+                                <td class="td-{{ name }}">
                                     {% with url=field_value.value.get_absolute_url value=field_value.value.get_str %}
                                         {% if url %}
                                             <a href="{{ url }}">
@@ -114,8 +114,10 @@
                                     </button>
                                 </td>
                             {% else %}
-                                <td id="{{ model_name }}_{{ object.pk }}_{{ name }}">
-                                    {{ field_value.value }}
+                                <td class="td-{{ name }}"
+                                    id="{{ model_name }}_{{ object.pk }}_{{ name }}"
+                                    >
+                                    {{ field_value.value|default:'' }}
                                 </td>
                             {% endif %}
                         {% endfor %}
