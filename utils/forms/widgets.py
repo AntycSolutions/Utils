@@ -195,6 +195,7 @@ class ConfirmClearableFile(
 # TODO:
 # class ClearableMultiFileMultiWidget(widgets.MultiWidget):
 
+
 # a MultiWidget where each existing file is a ConfirmClearableFile and
 #  new files are handled by MultiFileInput
 #  used with MultiFileField

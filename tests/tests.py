@@ -41,7 +41,7 @@ class MultiFileFieldTests(test.TestCase):
 
         self.assertEqual(file.file.name, 'tests/file1.txt')
         self.assertEqual(file.filename(), 'file1.txt')
-        self.assertEqual(str(file), file.filename())
+        self.assertEqual(str(self.test_file), file.filename())
 
     def test_forms(self):
         str(tests_forms.UserForm())
@@ -146,11 +146,12 @@ class MultiFileFieldTests(test.TestCase):
             fillvalue=LAST_INITIAL
         )
         for _file, initial_datum in both:
+            self.assertEqual(initial_datum, LAST_INITIAL)
             if initial_datum is LAST_INITIAL:
                 file = tests_models.File.objects.create(file=_file, user=user)
                 self.assertEqual(file.file.name, 'tests/file2.txt')
                 self.assertEqual(file.filename(), 'file2.txt')
-                self.assertEqual(str(file), file.filename())
+                self.assertEqual(str(_file), file.filename())
 
         # multiple files, MultiValueDict
         form = tests_forms.UserForm(
@@ -177,16 +178,16 @@ class MultiFileFieldTests(test.TestCase):
         )
         i = 0
         for _file, initial_datum in both:
+            self.assertEqual(initial_datum, LAST_INITIAL)
             if initial_datum is LAST_INITIAL:
                 file = tests_models.File.objects.create(file=_file, user=user)
+                self.assertEqual(str(_file), file.filename())
                 if i == 0:
                     self.assertEqual(file.file.name, 'tests/file3.txt')
                     self.assertEqual(file.filename(), 'file3.txt')
-                    self.assertEqual(str(file), file.filename())
                 elif i == 1:
                     self.assertEqual(file.file.name, 'tests/file4.txt')
                     self.assertEqual(file.filename(), 'file4.txt')
-                self.assertEqual(str(file), file.filename())
                 i += 1
 
         # multiple files, dict
@@ -213,16 +214,16 @@ class MultiFileFieldTests(test.TestCase):
         )
         i = 0
         for _file, initial_datum in both:
+            self.assertEqual(initial_datum, LAST_INITIAL)
             if initial_datum is LAST_INITIAL:
                 file = tests_models.File.objects.create(file=_file, user=user)
+                self.assertEqual(str(_file), file.filename())
                 if i == 0:
                     self.assertEqual(file.file.name, 'tests/file5.txt')
                     self.assertEqual(file.filename(), 'file5.txt')
-                    self.assertEqual(str(file), file.filename())
                 elif i == 1:
                     self.assertEqual(file.file.name, 'tests/file6.txt')
                     self.assertEqual(file.filename(), 'file6.txt')
-                self.assertEqual(str(file), file.filename())
                 i += 1
 
     def test_multi_file_field_kwargs(self):
@@ -571,10 +572,11 @@ class MultiFileFieldTests(test.TestCase):
             if i == 0:
                 self.assertEqual(file.file.name, 'tests/file2.txt')
                 self.assertEqual(file.filename(), 'file2.txt')
+                self.assertEqual(str(test_file2), file.filename())
             elif i == 1:
                 self.assertEqual(file.file.name, 'tests/file4.txt')
                 self.assertEqual(file.filename(), 'file4.txt')
-            self.assertEqual(str(file), file.filename())
+                self.assertEqual(str(test_file4), file.filename())
             i += 1
 
         # update first step
@@ -625,7 +627,7 @@ class MultiFileFieldTests(test.TestCase):
         for file in files:
             self.assertEqual(file.file.name, 'tests/file4.txt')
             self.assertEqual(file.filename(), 'file4.txt')
-            self.assertEqual(str(file), file.filename())
+            self.assertEqual(str(test_file4), file.filename())
 
     def test_multi_file_field_in_wizard_required(self):
         # load first step
@@ -745,7 +747,7 @@ class MultiFileFieldTests(test.TestCase):
         for file in files:
             self.assertEqual(file.file.name, 'tests/file2.txt')
             self.assertEqual(file.filename(), 'file2.txt')
-            self.assertEqual(str(file), file.filename())
+            self.assertEqual(str(test_file2), file.filename())
 
         # update first step but fail
         response = self.client.post(
@@ -770,7 +772,7 @@ class MultiFileFieldTests(test.TestCase):
         for file in files:
             self.assertEqual(file.file.name, 'tests/file2.txt')
             self.assertEqual(file.filename(), 'file2.txt')
-            self.assertEqual(str(file), file.filename())
+            self.assertEqual(str(test_file2), file.filename())
 
     def test_multi_file_field_in_wizard_multiple_files(self):
         # load first step
@@ -1039,7 +1041,7 @@ class MultiFileFieldTests(test.TestCase):
         for file in files:
             self.assertEqual(file.file.name, 'tests/file2.txt')
             self.assertEqual(file.filename(), 'file2.txt')
-            self.assertEqual(str(file), file.filename())
+            self.assertEqual(str(test_file2), file.filename())
 
     def test_multi_file_field_in_wizard_upload_twice(self):
         # load first step
@@ -1142,8 +1144,254 @@ class MultiFileFieldTests(test.TestCase):
             if i == 0:
                 self.assertEqual(file.file.name, 'tests/file2.txt')
                 self.assertEqual(file.filename(), 'file2.txt')
+                self.assertEqual(str(test_file2), file.filename())
             elif i == 1:
                 self.assertEqual(file.file.name, 'tests/file3.txt')
                 self.assertEqual(file.filename(), 'file3.txt')
-            self.assertEqual(str(file), file.filename())
+                self.assertEqual(str(test_file3), file.filename())
             i += 1
+
+    def test_user_form_with_save(self):
+        # create
+        test_file2 = uploadedfile.SimpleUploadedFile('file2.txt', b'content')
+        test_file3 = uploadedfile.SimpleUploadedFile('file3.txt', b'content3')
+        test_file4 = uploadedfile.SimpleUploadedFile('file4.txt', b'content4')
+        test_file5 = uploadedfile.SimpleUploadedFile('file5.txt', b'content5')
+        test_file6 = uploadedfile.SimpleUploadedFile('file6.txt', b'content6')
+
+        # one file
+        form = tests_forms.UserFormWithSave(
+            {
+                'username': 'test2',
+                'date_joined': timezone.now(),
+                'password': 'password',
+            },
+            {
+                'files_0': test_file2  # subwidget name
+            }
+        )
+        self.assertTrue(form.is_valid())
+
+        user = form.save()
+        self.assertEqual(user.username, 'test2')
+
+        file = tests_models.File.objects.get(user=user)
+        self.assertEqual(file.file.name, 'tests/file2.txt')
+        self.assertEqual(file.filename(), 'file2.txt')
+        self.assertEqual(str(test_file2), file.filename())
+        file.file.delete()
+        file.delete()
+
+        # multiple files, MultiValueDict
+        form = tests_forms.UserFormWithSave(
+            {
+                'username': 'test3',
+                'date_joined': timezone.now(),
+                'password': 'password',
+            },
+            # use MultiValueDict to hit MultiFileInput.value_from_datadict
+            datastructures.MultiValueDict({
+                'files_0': [test_file3, test_file4]  # subwidget name
+            })
+        )
+        self.assertTrue(form.is_valid())
+
+        user = form.save()
+        self.assertEqual(user.username, 'test3')
+
+        files = tests_models.File.objects.filter(user=user)
+        i = 0
+        for _file in files:
+            if i == 0:
+                self.assertEqual(_file.file.name, 'tests/file3.txt')
+                self.assertEqual(_file.filename(), 'file3.txt')
+                self.assertEqual(str(test_file3), _file.filename())
+            elif i == 1:
+                self.assertEqual(_file.file.name, 'tests/file4.txt')
+                self.assertEqual(_file.filename(), 'file4.txt')
+                self.assertEqual(str(test_file4), _file.filename())
+            i += 1
+            _file.file.delete()
+            _file.delete()
+
+        # multiple files, dict
+        form = tests_forms.UserFormWithSave(
+            {
+                'username': 'test4',
+                'date_joined': timezone.now(),
+                'password': 'password',
+            },
+            {
+                'files_0': [test_file5, test_file6]  # subwidget name
+            }
+        )
+        self.assertTrue(form.is_valid())
+
+        user = form.save()
+        self.assertEqual(user.username, 'test4')
+
+        files = tests_models.File.objects.filter(user=user)
+        i = 0
+        for _file in files:
+            if i == 0:
+                self.assertEqual(_file.file.name, 'tests/file5.txt')
+                self.assertEqual(_file.filename(), 'file5.txt')
+                self.assertEqual(str(test_file5), _file.filename())
+            elif i == 1:
+                self.assertEqual(_file.file.name, 'tests/file6.txt')
+                self.assertEqual(_file.filename(), 'file6.txt')
+                self.assertEqual(str(test_file6), _file.filename())
+            i += 1
+            _file.file.delete()
+            _file.delete()
+
+        User = auth.get_user_model()
+        user = User.objects.get(username='test1')
+
+        # update
+
+        # one file
+        form = tests_forms.UserFormWithSave(
+            {
+                'username': 'test1',
+                'date_joined': timezone.now(),
+                'password': 'password',
+            },
+            {
+                'files_1': test_file2  # subwidget name
+            },
+            instance=user
+        )
+        self.assertTrue(form.is_valid())
+
+        user = form.save()
+        self.assertEqual(user.username, 'test1')
+
+        files = tests_models.File.objects.filter(user=user)
+        i = 0
+        for _file in files:
+            if i == 0:
+                self.assertEqual(_file.file.name, 'tests/file1.txt')
+                self.assertEqual(_file.filename(), 'file1.txt')
+                self.assertEqual(str(self.test_file), _file.filename())
+            elif i == 1:
+                self.assertEqual(_file.file.name, 'tests/file2.txt')
+                self.assertEqual(_file.filename(), 'file2.txt')
+                self.assertEqual(str(test_file2), _file.filename())
+                _file.file.delete()
+                _file.delete()
+            i += 1
+
+        # multiple files, MultiValueDict
+        form = tests_forms.UserFormWithSave(
+            {
+                'username': 'test1',
+                'date_joined': timezone.now(),
+                'password': 'password',
+            },
+            # use MultiValueDict to hit MultiFileInput.value_from_datadict
+            datastructures.MultiValueDict({
+                'files_1': [test_file3, test_file4]  # subwidget name
+            }),
+            instance=user
+        )
+        self.assertTrue(form.is_valid())
+
+        user = form.save()
+        self.assertEqual(user.username, 'test1')
+
+        files = tests_models.File.objects.filter(user=user)
+        i = 0
+        for _file in files:
+            if i == 0:
+                self.assertEqual(_file.file.name, 'tests/file1.txt')
+                self.assertEqual(_file.filename(), 'file1.txt')
+                self.assertEqual(str(self.test_file), _file.filename())
+            elif i == 1:
+                self.assertEqual(_file.file.name, 'tests/file3.txt')
+                self.assertEqual(_file.filename(), 'file3.txt')
+                self.assertEqual(str(test_file3), _file.filename())
+                _file.file.delete()
+                _file.delete()
+            elif i == 2:
+                self.assertEqual(_file.file.name, 'tests/file4.txt')
+                self.assertEqual(_file.filename(), 'file4.txt')
+                self.assertEqual(str(test_file4), _file.filename())
+                _file.file.delete()
+                _file.delete()
+            i += 1
+
+        # multiple files, dict
+        form = tests_forms.UserFormWithSave(
+            {
+                'username': 'test1',
+                'date_joined': timezone.now(),
+                'password': 'password',
+            },
+            {
+                'files_1': [test_file5, test_file6]  # subwidget name
+            },
+            instance=user
+        )
+        self.assertTrue(form.is_valid())
+
+        user = form.save()
+        self.assertEqual(user.username, 'test1')
+
+        files = tests_models.File.objects.filter(user=user)
+        i = 0
+        for _file in files:
+            if i == 0:
+                self.assertEqual(_file.file.name, 'tests/file1.txt')
+                self.assertEqual(_file.filename(), 'file1.txt')
+                self.assertEqual(str(self.test_file), _file.filename())
+            elif i == 1:
+                self.assertEqual(_file.file.name, 'tests/file5.txt')
+                self.assertEqual(_file.filename(), 'file5.txt')
+                self.assertEqual(str(test_file5), _file.filename())
+                _file.file.delete()
+                _file.delete()
+            elif i == 2:
+                self.assertEqual(_file.file.name, 'tests/file6.txt')
+                self.assertEqual(_file.filename(), 'file6.txt')
+                self.assertEqual(str(test_file6), _file.filename())
+                _file.file.delete()
+                _file.delete()
+            i += 1
+
+        user = User.objects.get(username='test1')
+
+        files = tests_models.File.objects.all()
+        self.assertEqual(len(files), 1)
+
+        # update and do nothing
+        form = tests_forms.UserFormWithSave(
+            {
+                'username': 'test1',
+                'date_joined': timezone.now(),
+                'password': 'password',
+            },
+            instance=user
+        )
+        self.assertTrue(form.is_valid())
+
+        user = form.save()
+        files = tests_models.File.objects.all()
+        self.assertEqual(len(files), 1)
+
+        # update and clear a file
+        form = tests_forms.UserFormWithSave(
+            {
+                'username': 'test1',
+                'date_joined': timezone.now(),
+                'password': 'password',
+                'files_0-clear': True  # subwidget name
+            },
+            instance=user
+        )
+        self.assertTrue(form.is_valid())
+
+        user = form.save()
+        self.assertEqual(user.username, 'test1')
+        self.assertEqual(tests_models.File.objects.count(), 0)
+        files[0].file.delete()
