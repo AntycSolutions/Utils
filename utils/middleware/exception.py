@@ -1,11 +1,20 @@
+from django.utils import deprecation
 
-class ExceptionUserInfoMiddleware(object):
+
+if not hasattr(deprecation, 'MiddlewareMixin'):
+    deprecation.MiddlewareMixin = object  # django <= 1.8 compat
+
+
+# compatible with both styles of middleware
+class ExceptionUserInfoMiddleware(deprecation.MiddlewareMixin):
     """
-    Adds user details to request context on receiving an exception, so that
-    they show up in the error emails.
+    Adds user details to request context on receiving an exception,
+    so that they show up in the error emails.
 
-    Add to settings.MIDDLEWARE_CLASSES and keep it outermost (i.e. on top if
-    possible). This allows it to catch exceptions in other middlewares as well.
+    Add to settings.MIDDLEWARE (1.11) or
+    settings.MIDDLEWARE_CLASSES (<1.11) and keep it outermost
+    (i.e. on top if possible). This allows it to catch exceptions
+    in other middlewares as well.
     """
 
     def process_exception(self, request, exception):
