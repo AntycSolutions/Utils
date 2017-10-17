@@ -2,12 +2,22 @@ from django import template
 from django.conf import settings
 from django.utils import safestring
 
-from pipeline import conf
+try:
+    from pipeline import conf
+    HAS_PIPELINE = True
+except ImportError:
+    HAS_PIPELINE = False
 
 register = template.Library()
 
 
 def _pipeline_shim(type_, pipeline_key, dependency):
+    if not HAS_PIPELINE:
+        raise ImportError(
+            "Please install 'django-pipeline' library to use "
+            "fallback_tags."
+        )
+
     shim = None
 
     fallback_key = None
