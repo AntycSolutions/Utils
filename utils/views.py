@@ -1,4 +1,5 @@
 import os
+import json
 import urllib
 
 from django.conf import settings
@@ -260,15 +261,27 @@ def server_error(request, template_name='500.html'):
 def js_reporter(request):
     if request.method == 'POST':
         url = request.POST.get('url', '')
-        json = request.POST.get('json', '')
+        _json = request.POST.get('json', '{}')
+        response = request.POST.get('response', '')
 
-        if url or json:
+        if url or _json or response:
+            pretty_json = json.dumps(json.loads(_json), indent=4)
+            # preserve spaces and newlines
+            pretty_html_json = " &nbsp;".join(
+                pretty_json.replace('\n', '<br>').split('  ')
+            )
             mail.mail_admins(
                 'JS Issue',
-                'url: {}\n\njson:\n\n{}\n',
+                'url: {}\n\njson:\n\n{}\n\nresponse:\n\n{}\n\n'.format(
+                    url, pretty_json, response
+                ),
                 html_message=(
-                    'url: {}<br><br>json:<br><br><code>{}</code><br>'.format(
-                        url, json
+                    'url: {}<br><br>'
+                    'json:<br><br><code>{}</code><br><br>'
+                    'response:<br><br>{}<br><br>'.format(
+                        url,
+                        pretty_html_json,
+                        response.replace('\n', '<br>')
                     )
                 )
             )
