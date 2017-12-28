@@ -4,7 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 
-class FieldList():
+class FieldList:
     Field = collections.namedtuple('Field', ['field', 'value'])
 
     def get_all_fields(self):
@@ -21,7 +21,7 @@ class FieldList():
             else:
                 try:
                     value = getattr(self, fname)
-                except:
+                except AttributeError:
                     # print("Could not get value of field.")
                     value = None
 
