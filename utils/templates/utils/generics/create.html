@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends utils_settings.GENERICS.base_template %}
 
 {% load static %}
 {% load field_utils %}
@@ -91,11 +91,15 @@
         var year_range = "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}";
 
         $(document).ready(function() {
-            $(".datepicker").datepicker({
-                changeMonth: true,
-                changeYear: true,
-                yearRange: year_range,
-            });
+            var options = {
+                format: 'M. d, yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                clearBtn: true,
+                startDate: '-100y',
+                zIndexOffset: 1030,
+            }
+            $('.input-group.date').datepicker(options);
 
             var prefix = "{{ formset.get_default_prefix }}";
 
@@ -185,7 +189,7 @@
     {% include 'utils/snippets/messages.html' %}
 
     <form id="create_{{ model_name|slugify }}_form"
-            class="form-horizontal" method="POST" enctype="{{ form_type }}">
+            class="form-horizontal" method="POST" >
         {% csrf_token %}
         <div class="row">
             <fieldset class="col-lg-6">

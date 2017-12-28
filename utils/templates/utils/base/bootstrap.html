@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% if settings.UTILS.bootstrap3 %}
+{% if utils_settings.BASE.bootstrap3 %}
     {% block meta %}
         {{ block.super }}
 
@@ -20,8 +20,8 @@
             {# WARNING: Respond.js doesn't work if you view the page via file:// #}
             {# TODO: how to fallback these? #}
             <!--[if lt IE 9]>
-                <script src="//oss.maxcdn.com/html5shiv/{{ utils_settings.VERSIONS.html5shiv_js }}/html5shiv.min.js" type="text/javascript"></script>
-                <script src="//oss.maxcdn.com/respond/{{ utils_settings.VERSIONS.respond_js }}/respond.min.js" type="text/javascript"></script>
+                <script src="https://oss.maxcdn.com/html5shiv/{{ utils_settings.UTILS.VERSIONS.html5shiv_js }}/html5shiv.min.js" type="text/javascript"></script>
+                <script src="https://oss.maxcdn.com/respond/{{ utils_settings.UTILS.VERSIONS.respond_js }}/respond.min.js" type="text/javascript"></script>
             <![endif]-->
         {% endblock %}
     {% endblock %}
@@ -40,7 +40,7 @@
         </style>
     {% endblock %}
 
-    {% if settings.UTILS.fallback %}
+    {% if utils_settings.BASE.fallback %}
         <script type="text/javascript">
             {% block fallback_load %}
                 {{ block.super }}
@@ -48,18 +48,18 @@
                 {% block bootstrap_fallback_load %}
                     {% block bootstrap_fallback_load_css %}
                         bootstrap_css: [
-                            '//maxcdn.bootstrapcdn.com/bootstrap/{{ utils_settings.VERSIONS.bootstrap_css }}/css/bootstrap.min.css',
+                            'https://maxcdn.bootstrapcdn.com/bootstrap/{{ utils_settings.VERSIONS.bootstrap_css }}/css/bootstrap.min.css',
                             "{% static 'utils/css/bootstrap.min.css' %}"
                         ],
                     {% endblock %}
 
                     jQuery: [
-                        '//code.jquery.com/jquery-{{ utils_settings.VERSIONS.jquery_js }}.min.js',
+                        'https://code.jquery.com/jquery-{{ utils_settings.VERSIONS.jquery_js }}.min.js',
                         "{% static 'utils/js/jquery.min.js' %}"
                     ],
 
                     'jQuery.fn.modal': [ // bootstrap
-                        '//maxcdn.bootstrapcdn.com/bootstrap/{{ utils_settings.VERSIONS.bootstrap_js }}/js/bootstrap.min.js',
+                        'https://maxcdn.bootstrapcdn.com/bootstrap/{{ utils_settings.VERSIONS.bootstrap_js }}/js/bootstrap.min.js',
                         "{% static 'utils/js/bootstrap.min.js' %}"
                     ],
                 {% endblock %}

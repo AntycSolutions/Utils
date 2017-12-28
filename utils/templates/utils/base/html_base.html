@@ -1,28 +1,42 @@
-{% load template_utils %}
-
-{% get_app_settings 'utils' as utils_settings %}
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
         {% block meta %}
-            <meta charset="utf-8" />
+            <meta charset="utf-8">
 
-            <meta name="author" content="Antyc Solutions" />
+            <meta name="author" content="Antyc Solutions">
         {% endblock %}
 
         {% block head %}{% endblock %}
+
+        <style type="text/css">
+            #scroll-top-btn {
+                display: none; /* start hidden */
+                /* stick to bottom right */
+                position: fixed;
+                bottom: 20px;
+                right: 30px;
+            }
+        </style>
 
         {% block styles %}{% endblock %}
 
         {% block head_scripts %}{% endblock %}
     </head>
-    <body itemscope itemtype="http://schema.org/WebPage">
-        {% if settings.UTILS.fallback %}
+    <body itemscope itemtype="https://schema.org/WebPage">
+        {% if utils_settings.BASE.fallback %}
             <div id='overlay'></div>
         {% endif %}
 
         {% block body %}{% endblock %}
+
+        <button id="scroll-top-btn"
+            title="Go to top"
+            class="btn btn-default"
+            >
+            <span class="glyphicon glyphicon-chevron-up"></span>
+            Top
+        </button>
 
         <noscript>
             Your browser does not support JavaScript!
@@ -30,16 +44,44 @@
 
         {% block body_scripts %}{% endblock %}
 
-        {# browser update warning #}
         <script type="text/javascript">
+            // When the user scrolls down from the top of the document,
+            //  show the button
+            {# https://www.w3schools.com/howto/howto_js_scroll_to_top.asp #}
+            function scrollFunction() {
+                var min_scroll_amount = 115;
+                var hasScrolled = (
+                    document.body.scrollTop > min_scroll_amount ||
+                    document.documentElement.scrollTop > min_scroll_amount
+                );
+                var scrollTopBtn = document.getElementById("scroll-top-btn");
+                if (hasScrolled) {
+                    scrollTopBtn.style.display = "block";
+                } else {
+                    scrollTopBtn.style.display = "none";
+                }
+            }
+            window.addEventListener('scroll', scrollFunction);
+
+            // When the user clicks on the button,
+            //  scroll to the top of the document
+            function topFunction() {
+                document.body.scrollTop = 0; // For Chrome, Safari and Opera
+                document.documentElement.scrollTop = 0; // For IE and Firefox
+            }
+            document.getElementById('scroll-top-btn').addEventListener(
+                'click', topFunction
+            );
+
+            {# browser update warning #}
             var $buoop = { c: 2 };
             function $buo_f() {
                 var e = document.createElement("script");
-                e.src = "//browser-update.org/update.min.js";
+                e.src = "https://browser-update.org/update.min.js";
                 document.body.appendChild(e);
-            };
+            }
             try {
-                document.addEventListener("DOMContentLoaded", $buo_f,false);
+                document.addEventListener("DOMContentLoaded", $buo_f, false);
             }
             catch(e)
             {

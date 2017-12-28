@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends utils_settings.GENERICS.base_template %}
 
 {% load static %}
 {% load field_utils %}
@@ -91,11 +91,15 @@
         var year_range = "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}";
 
         $(document).ready(function() {
-            $(".datepicker").datepicker({
-                changeMonth: true,
-                changeYear: true,
-                yearRange: year_range,
-            });
+            var options = {
+                format: 'M. d, yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                clearBtn: true,
+                startDate: '-100y',
+                zIndexOffset: 1030,
+            }
+            $('.input-group.date').datepicker(options);
 
             var prefix = "{{ formset.get_default_prefix }}";
 
@@ -261,7 +265,9 @@
                         <button type="submit" class="btn btn-primary inline">
                             Update
                         </button>
-                        <a href="{{ cancel_url }}" class="btn btn-default">
+                        <a href="{{ cancel_url|default:object.get_absolute_url }}"
+                            class="btn btn-default"
+                            >
                             Cancel
                         </a>
                         {{ multistep_buttons }}

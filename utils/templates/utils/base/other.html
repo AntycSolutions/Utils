@@ -2,33 +2,33 @@
 
 {% load static %}
 
-{% if settings.UTILS.fallback %}
+{% if utils_settings.BASE.fallback %}
     <script type="text/javascript">
         {% block fallback_load %}
             {{ block.super }}
 
-            {% if settings.UTILS.font_awesome %}
+            {% if utils_settings.BASE.font_awesome %}
                 font_awesome_css: [
-                    '//maxcdn.bootstrapcdn.com/font-awesome/{{ utils_settings.VERSIONS.font_awesome_css }}/css/font-awesome.min.css',
+                    'https://maxcdn.bootstrapcdn.com/font-awesome/{{ utils_settings.VERSIONS.font_awesome_css }}/css/font-awesome.min.css',
                     "{% static 'utils/css/font-awesome.min.css' %}"
                 ],
             {% endif %}
 
-            {% if settings.UTILS.jquery_ui %}
+            {% if utils_settings.BASE.jquery_ui %}
                 jquery_ui_smoothness_css: [
-                    '//code.jquery.com/ui/{{ utils_settings.VERSIONS.jquery_ui_css }}/themes/smoothness/jquery-ui.min.css',
+                    'https://code.jquery.com/ui/{{ utils_settings.VERSIONS.jquery_ui_css }}/themes/smoothness/jquery-ui.min.css',
                     "{% static 'utils/css/jquery-ui.min.css' %}"
                 ],
 
                 'jQuery.ui': [
-                    '//code.jquery.com/ui/{{ utils_settings.VERSIONS.jquery_ui_js }}/jquery-ui.min.js',
+                    'https://code.jquery.com/ui/{{ utils_settings.VERSIONS.jquery_ui_js }}/jquery-ui.min.js',
                     "{% static 'utils/js/jquery-ui.min.js' %}"
                 ],
             {% endif %}
 
             {% if lazy %}
                 'jQuery.fn.lazy': [
-                    '//cdn.jsdelivr.net/jquery.lazy/{{ utils_settings.VERSIONS.jquery_lazy_js }}/jquery.lazy.min.js',
+                    'https://cdn.jsdelivr.net/jquery.lazy/{{ utils_settings.VERSIONS.jquery_lazy_js }}/jquery.lazy.min.js',
                     "{% static 'utils/js/jquery.lazy.min.js' %}"
                 ],
             {% endif %}
@@ -37,7 +37,7 @@
         {% block fallback_shim %}
             {{ block.super }}
 
-            {% if settings.UTILS.jquery_ui %}
+            {% if utils_settings.BASE.jquery_ui %}
                 'jQuery.ui': ['jQuery'],
             {% endif %}
             {% if lazy %}

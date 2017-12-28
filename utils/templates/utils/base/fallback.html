@@ -5,7 +5,7 @@
 {% block styles %}
     {{ block.super }}
 
-    {% if settings.UTILS.fallback %}
+    {% if utils_settings.BASE.fallback %}
         <style type="text/css">
             #overlay {
                 position: fixed;
@@ -28,7 +28,7 @@
 {% block head_scripts %}
     {{ block.super }}
 
-    {% if settings.UTILS.fallback %}
+    {% if utils_settings.BASE.fallback %}
         <script type="text/javascript">
             function fallback_fallback() {
                 if (typeof fallback === 'undefined') {
@@ -111,7 +111,7 @@
         </script>
         {# fallback js #}
         <script async
-                src="//cdnjs.cloudflare.com/ajax/libs/fallback/{{ utils_settings.VERSIONS.fallback_js }}/fallback.min.js"
+                src="https://cdnjs.cloudflare.com/ajax/libs/fallback/{{ utils_settings.VERSIONS.fallback_js }}/fallback.min.js"
                 type="text/javascript"
                 onload="load_fallback();"
                 onerror="fallback_fallback();"

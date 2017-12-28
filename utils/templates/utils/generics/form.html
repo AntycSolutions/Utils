@@ -23,6 +23,7 @@
         <label class="col-lg-3 control-label" for="{{ field.auto_id }}">
             {{ field.label }}{% if field.field.required %}*{% endif %}
         </label>
+
         <div class="col-lg-9">
             {% if field|get_form_field_type|is_file %}
                 <div class="btn-file" style="padding: 9px 0px;">
@@ -38,11 +39,16 @@
                 <div class="checkbox">
                     {% for checkbox in field %}
                         {{ checkbox }}
-                        <br />
+                        <br>
                     {% endfor %}
                 </div>
             {% elif field|get_form_field_type|is_date %}
-                {{ field|update_attrs:"class: form-control datepicker" }}
+                <div class="input-group date">
+                    {{ field|update_attrs:"class: form-control" }}
+                    <div class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </div>
+                </div>
             {% elif field.name in form.instance.money_fields %}
                 <div class="input-group">
                     <div class="input-group-addon">$</div>
@@ -51,11 +57,13 @@
             {% else %}
                 {{ field|update_attrs:"class: form-control" }}
             {% endif %}
+
             {% if field.help_text %}
                 <span class="help-block">
                     {{ field.help_text }}
                 </span>
             {% endif %}
+
             {% if field.errors %}
                 <span class="help-block">
                     {{ field.errors }}
