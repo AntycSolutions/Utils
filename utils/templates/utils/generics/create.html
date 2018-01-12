@@ -214,7 +214,7 @@
                     {% for form in formset %}
                         <div id="{{ forloop.counter0 }}_{{ inline_model_name|slugify }}_form">
                             {% if not inline %}
-                                {% include 'utils/generics/form.html' %}
+                                {% include 'utils/generics/form.html' with hide_required_msg=True %}
                                 {% if not forloop.last %}
                                     <hr />
                                 {% endif %}

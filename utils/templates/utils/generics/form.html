@@ -7,11 +7,13 @@
     </div>
 {% endif %}
 
-<div class="col-lg-9 col-lg-offset-3">
-    <p>
-        Fields marked with * are required
-    </p>
-</div>
+{% if not hide_required_msg %}
+    <div class="col-lg-9 col-lg-offset-3">
+        <p>
+            Fields marked with * are required
+        </p>
+    </div>
+{% endif %}
 
 {% for hidden in form.hidden_fields %}
     {{ hidden.errors }}
