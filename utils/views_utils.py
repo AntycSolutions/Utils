@@ -2,19 +2,52 @@ from django import shortcuts, http
 from django.contrib import messages
 from django.core import paginator
 
+from utils import models
+from utils.conf import settings
+
 
 def _get_paginate_by(request, rows_per_page_var, context=None):
     paginate_by = 10  # default
 
-    if request.session.get(rows_per_page_var, False):
-        # previous stored value
-        paginate_by = request.session[rows_per_page_var]
+    if settings['MODELS']['session_per_page_store']:
+        # previously set value
+        paginate_by = request.session.get(rows_per_page_var, paginate_by)
+
+    if settings['MODELS']['db_per_page_store']:
+        try:
+            paginate = models.Paginate.objects.get(user_id=request.user.pk)
+        except models.Paginate.DoesNotExist:
+            paginate = None
+
+        if paginate:
+            rows_per_page_json = paginate.rows_per_page_json
+
+            # previously set value
+            paginate_by = rows_per_page_json.get(
+                rows_per_page_var, paginate_by
+            )
 
     rows_per_page = request.GET.get(rows_per_page_var, '').strip()
-    if rows_per_page:
+
+    if rows_per_page and paginate_by != rows_per_page:
         # new value
         paginate_by = rows_per_page
-        request.session[rows_per_page_var] = paginate_by
+
+        if settings['MODELS']['session_per_page_store']:
+            request.session[rows_per_page_var] = paginate_by
+
+        if settings['MODELS']['db_per_page_store']:
+            if not paginate:
+                paginate = models.Paginate.objects.create(
+                    user_id=request.user.pk
+                )
+
+                rows_per_page_json = paginate.rows_per_page_json
+
+            rows_per_page_json[rows_per_page_var] = paginate_by
+
+            paginate.rows_per_page_json = rows_per_page_json
+            paginate.save()
 
     if context:
         context[rows_per_page_var] = paginate_by

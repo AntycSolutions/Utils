@@ -2,11 +2,19 @@ from django.conf import settings as django_settings
 
 
 utils = 'UTILS'
+models = 'MODELS'
 base = 'BASE'
 generics = 'GENERICS'
 versions = 'VERSIONS'
 
+db_per_page_store = 'db_per_page_store'
+session_per_page_store = 'session_per_page_store'
+
 settings = {
+    models: {
+        db_per_page_store: False,
+        session_per_page_store: True,
+    },
     base: {
         'bootstrap3': False,
         'fallback': False,
@@ -34,6 +42,17 @@ settings = {
 }
 
 django_settings_UTILS = getattr(django_settings, utils, {})
+
+settings[models].update(django_settings_UTILS.get(models, {}))
+
+invalid_pagination_store = (
+    settings[models][db_per_page_store] and
+    settings[models][session_per_page_store]
+)
+if invalid_pagination_store:
+    raise Exception(
+        'Use db_per_page_store or session_per_page_store, not both'
+    )
 
 settings[base].update(django_settings_UTILS.get(base, {}))
 settings[generics].update(django_settings_UTILS.get(generics, {}))
