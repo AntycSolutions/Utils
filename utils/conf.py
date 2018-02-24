@@ -24,6 +24,7 @@ settings = {
     },
     generics: {
         'base_template': 'base.html',
+        'date_format': 'M. d, yyyy',
     },
     versions: {
         'fallback_js': '1.1.8',
