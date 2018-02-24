@@ -4,7 +4,7 @@ from django.core import paginator
 
 
 def _get_paginate_by(request, rows_per_page_var, context=None):
-    paginate_by = 5  # default
+    paginate_by = 10  # default
 
     if request.session.get(rows_per_page_var, False):
         # previous stored value
