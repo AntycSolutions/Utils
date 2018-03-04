@@ -265,11 +265,13 @@
                         <button type="submit" class="btn btn-primary inline">
                             Update
                         </button>
-                        <a href="{{ cancel_url|default:object.get_absolute_url }}"
-                            class="btn btn-default"
-                            >
-                            Cancel
-                        </a>
+                        {% with object.get_absolute_url as url %}
+                            <a href="{{ cancel_url|default:url }}"
+                                class="btn btn-default"
+                                >
+                                Cancel
+                            </a>
+                        {% endwith %}
                         {{ multistep_buttons }}
                     </div>
                 </div>
