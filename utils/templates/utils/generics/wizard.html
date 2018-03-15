@@ -52,11 +52,15 @@
         var year_range = "{{ current_year|add:"-100" }}:{{ current_year|add:"5" }}";
 
         $(document).ready(function() {
-            $(".datepicker:visible").datepicker({
-                changeMonth: true,
-                changeYear: true,
-                yearRange: year_range,
-            });
+            var options = {
+                format: '{{ settings.UTILS.GENERICS.date_format }}',
+                autoclose: true,
+                todayHighlight: true,
+                clearBtn: true,
+                startDate: '-100y',
+                zIndexOffset: 1030,
+            };
+            $('.input-group.date').datepicker(options);
 
             {# TODO: move to static js #}
             {% if wizard.form.forms %}
@@ -89,11 +93,9 @@
                         .replace(nested_empty_prefix, 0);
                     $(form).appendTo('#forms');
 
-                    $('#' + form_idx + '_form .datepicker').datepicker({
-                        changeMonth: true,
-                        changeYear: true,
-                        yearRange: year_range,
-                    });
+                    $('#' + form_idx + '_form .datepicker').datepicker(
+                        options
+                    );
 
                     {# TODO: support more than one level of nested #}
                     {% if wizard.form.nested_formset_class %}

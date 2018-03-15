@@ -41,7 +41,7 @@ def is_file(widget):
 
 @register.filter
 def is_datetimepicker(widget):
-    return isinstance(widget, widgets.DateTimePicker)
+    return isinstance(widget, widgets.DateTimeInput)
 
 
 @register.filter

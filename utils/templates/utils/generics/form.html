@@ -44,6 +44,8 @@
                         <br>
                     {% endfor %}
                 </div>
+            {% elif field|get_form_field_type|is_datetimepicker %}
+                {{ field }}
             {% elif field|get_form_field_type|is_date %}
                 <div class="input-group date">
                     {{ field|update_attrs:"class: form-control" }}

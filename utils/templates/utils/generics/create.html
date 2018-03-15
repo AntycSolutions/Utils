@@ -98,7 +98,7 @@
                 clearBtn: true,
                 startDate: '-100y',
                 zIndexOffset: 1030,
-            }
+            };
             $('.input-group.date').datepicker(options);
 
             var prefix = "{{ formset.get_default_prefix }}";
@@ -121,7 +121,7 @@
 
                     update_prefix(child.children, prefix);
                 }
-            }
+            };
 
             window.generic_template = window.generic_template || {};
 
@@ -141,11 +141,7 @@
                 dp = $(form).find('.datepicker');
                 // need to apply again, probably because it's cloned
                 dp.removeClass('hasDatepicker');
-                dp.datepicker({
-                    changeMonth: true,
-                    changeYear: true,
-                    yearRange: year_range,
-                });
+                dp.datepicker(options);
 
                 if (typeof formset_add_form_callback === 'function') {
                     formset_add_form_callback($(form), form_count);
