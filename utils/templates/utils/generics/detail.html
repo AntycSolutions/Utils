@@ -144,7 +144,7 @@
                                                             {# Skip object #}
                                                         {% else %}
                                                             <th>
-                                                                {{ field_value.field.verbose_name }}
+                                                                {{ field_value.field.verbose_name|title }}
                                                             </th>
                                                         {% endif %}
                                                     {% endfor %}
@@ -179,6 +179,7 @@
                     </div>
                 </div>
             </div>
+            {% block extra_body %}{% endblock %}
         </div>
         {% if footer_buttons %}
             <div class="panel-footer">

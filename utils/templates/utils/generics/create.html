@@ -17,7 +17,7 @@
         {% endif %}
 
         {% if css_url %}
-            {% if settings.UTILS.pipeline %}
+            {% if utils_settings.BASE.pipeline %}
                 {% stylesheet css_url %}
             {% else %}
                 css_url: '{{ css_url }}',
@@ -25,7 +25,7 @@
         {% endif %}
 
         {% if js_url %}
-            {% if settings.UTILS.pipeline %}
+            {% if utils_settings.BASE.pipeline %}
                 {% javascript js_url %}
             {% else %}
                 js_url: '{{ js_url }}',
@@ -58,7 +58,7 @@
         {{ block.super }}
 
         {% if css_url %}
-            {% if settings.UTILS.pipeline %}
+            {% if utils_settings.BASE.pipeline %}
                 {% pipeline_css_shim css_url 'bootstrap_css' %}
             {% else %}
                 css_url: 'bootstrap_css',
@@ -66,7 +66,7 @@
         {% endif %}
 
         {% if js_url %}
-            {% if settings.UTILS.pipeline %}
+            {% if utils_settings.BASE.pipeline %}
                 {% pipeline_js_shim js_url 'jQuery' %}
             {% else %}
                 js_url: 'jQuery',
@@ -92,7 +92,7 @@
 
         $(document).ready(function() {
             var options = {
-                format: '{{ settings.UTILS.GENERICS.date_format }}',
+                format: '{{ utils_settings.GENERICS.date_format }}',
                 autoclose: true,
                 todayHighlight: true,
                 clearBtn: true,
