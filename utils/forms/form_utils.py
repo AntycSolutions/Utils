@@ -18,3 +18,16 @@ def as_span(self):
         row_ender='</span>',
         help_text_html=' <span class="helptext">%s</span>',
         errors_on_separate_row=True)
+
+
+# used in place of a str as a backwards compatible entry in django Media
+# that supports specifying shim dependencies for fallbackjs
+class MediaStr(str):
+    def __new__(cls, *args, **kwargs):
+        shim = kwargs.pop('shim', None)
+
+        instance = super().__new__(cls, *args, **kwargs)
+
+        instance.shim = shim
+
+        return instance
