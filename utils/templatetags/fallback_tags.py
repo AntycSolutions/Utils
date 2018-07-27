@@ -11,7 +11,9 @@ except ImportError:
 register = template.Library()
 
 
-def _pipeline_shim(type_, pipeline_key, dependency):
+# dependencies is a string or comma separated string
+# eg 'jQuery.ui' or 'jQuery.ui,boostrap_css'
+def _pipeline_shim(type_, pipeline_key, dependencies):
     if not HAS_PIPELINE:
         raise ImportError(
             "Please install 'django-pipeline' library to use "
@@ -31,9 +33,9 @@ def _pipeline_shim(type_, pipeline_key, dependency):
     if not conf.settings.PIPELINE_ENABLED and debug_fallback_keys:
         shim = ''
         for value in debug_fallback_keys.values():
-            shim += '"{}": "{}",\n'.format(value, dependency)
+            shim += '"{}": {},\n'.format(value, dependencies.split(','))
     elif fallback_key:
-        shim = '"{}": "{}",'.format(fallback_key, dependency)
+        shim = '"{}": {},'.format(fallback_key, dependencies.split(','))
     else:
         raise Exception('Could not shim pipeline with key: ' + pipeline_key)
 
@@ -41,10 +43,10 @@ def _pipeline_shim(type_, pipeline_key, dependency):
 
 
 @register.simple_tag
-def pipeline_js_shim(pipeline_key, dependency):
-    return _pipeline_shim('JAVASCRIPT', pipeline_key, dependency)
+def pipeline_js_shim(pipeline_key, dependencies):
+    return _pipeline_shim('JAVASCRIPT', pipeline_key, dependencies)
 
 
 @register.simple_tag
-def pipeline_css_shim(pipeline_key, dependency):
-    return _pipeline_shim('STYLESHEETS', pipeline_key, dependency)
+def pipeline_css_shim(pipeline_key, dependencies):
+    return _pipeline_shim('STYLESHEETS', pipeline_key, dependencies)
