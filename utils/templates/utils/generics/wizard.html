@@ -116,6 +116,10 @@
                     {% endif %}
 
                     total_forms.val(parseInt(form_idx) + 1);
+
+                    if (typeof add_callback === 'function') {
+                        add_callback();
+                    }
                 });
 
                 {# TODO: support more than one level of nested #}
@@ -333,7 +337,7 @@
 
 {% endblock content %}
 
-{% block extra_scripts %}
+{% block body_scripts %}
     {{ block.super }}
 
     <script type="text/javascript">
@@ -354,6 +358,10 @@
                 $(form).appendTo('#' + form_idx + '-nested_forms');
 
                 nested_total_forms.val(parseInt(nested_form_idx) + 1);
+
+                if (typeof add_nested_callback === 'function') {
+                    add_nested_callback();
+                }
             }
         {% endif %}
     </script>
