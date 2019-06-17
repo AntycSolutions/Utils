@@ -5,7 +5,11 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 from django import template
+
+
 register = template.Library()
+if not hasattr(register, 'assignment_tag'):
+    register.assignment_tag = register.simple_tag
 
 
 @register.assignment_tag

@@ -2,7 +2,10 @@ import importlib
 
 from django import template
 
+
 register = template.Library()
+if not hasattr(register, 'assignment_tag'):
+    register.assignment_tag = register.simple_tag
 
 
 @register.filter()
