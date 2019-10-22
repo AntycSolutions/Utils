@@ -230,6 +230,16 @@ class InlineFormSetUpdateView(edit.UpdateView):
 
 
 def raise_exception(request):
+    # for testing 500s, exceptions, and error emails
+    if 'json' in request.GET:
+        request.content_type = 'json'
+        body = b'''{
+            "test_json": 1,
+            "str": "asdf",
+            "dt": "2019-04-17T21:19:19.857Z",
+            "dec": 1.2345
+        }'''
+        request._body = request.body or body
     raise Exception('Intentional error: raise_exception')
 
 
@@ -287,3 +297,25 @@ def js_reporter(request):
             )
 
     return http.JsonResponse({})
+
+
+def get_git_info():
+    git_info = os.popen(
+        'cd "{}" &&'
+        ' git symbolic-ref --short HEAD &&'
+        ' git rev-parse HEAD'.format(settings.BASE_DIR)
+    ).read().replace('\n', ' ').strip().split(' ')
+
+    if len(git_info) < 2 or not git_info[0] or not git_info[1]:
+        return 'Invalid git info', str(git_info)
+
+    branch = git_info[0]
+    commit_hash = git_info[1]
+
+    return branch, commit_hash
+
+
+def git_commit(request):
+    branch, commit_hash = get_git_info()
+
+    return http.JsonResponse({'branch': branch, 'commit': commit_hash})
