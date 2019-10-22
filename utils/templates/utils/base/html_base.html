@@ -60,6 +60,17 @@
                 } else {
                     scrollTopBtn.style.display = "none";
                 }
+                var scroll = window.innerHeight + window.pageYOffset;
+                var target = (
+                    document.documentElement.offsetHeight -
+                    55 /* footer offset */
+                );
+                if (scroll >= target) {
+                    scrollTopBtn.style.bottom = (
+                        20 /* original bottom */ +
+                        (scroll - target)
+                    ) + 'px';
+                }
             }
             window.addEventListener('scroll', scrollFunction);
 
