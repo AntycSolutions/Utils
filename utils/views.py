@@ -1,7 +1,9 @@
+# PSL
 import os
+import sys
 import json
 import urllib
-
+# 3rd Party
 from django.conf import settings
 from django import http, template
 from django.template import loader
@@ -10,7 +12,7 @@ from django.forms import models
 from django.views.decorators import csrf
 from django.core import mail
 from django.contrib.auth import decorators
-
+# Local
 from utils import utils
 
 
@@ -301,7 +303,9 @@ def js_reporter(request):
     return http.JsonResponse({})
 
 
-def git_commit(request):
+def ver(request):
     branch, commit_hash = utils.get_git_info()
 
-    return http.JsonResponse({'branch': branch, 'commit': commit_hash})
+    return http.JsonResponse({
+        'branch': branch, 'commit': commit_hash, 'py': sys.version
+    })

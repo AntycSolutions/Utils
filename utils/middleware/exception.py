@@ -42,8 +42,10 @@ class ExceptionUserInfoMiddleware(deprecation.MiddlewareMixin):
                 request.META['!!_USER_FULL_NAME'] = full_name
 
         branch, commit_hash = utils.get_git_info()
-        request.META['!!_PY_BRANCH'] = branch
-        request.META['!!_PY_COMMIT'] = commit_hash
+        request.META['!!_GIT_BRANCH'] = branch
+        request.META['!!_GIT_COMMIT'] = commit_hash
+
+        request.META['!!_PY'] = sys.version
 
         if hasattr(request, 'content_type'):
             content_type = request.content_type
@@ -59,14 +61,11 @@ class ExceptionUserInfoMiddleware(deprecation.MiddlewareMixin):
                 request.META['!!_ERROR'] = 'no body'
                 return
             try:
-                event = json.loads(body)
+                data = json.loads(body)
             except json.JSONDecodeError:
                 request.META['!!_ERROR'] = 'JSONDecodeError'
                 return
-            if not event:
+            if not data:
                 request.META['!!_ERROR'] = 'no json'
                 return
-            config_name = event.get('config_name')
-            if config_name:
-                request.META['!!_CONFIG'] = config_name
-            request.META['!!_JSON'] = json.dumps(event, sort_keys=True)
+            request.META['!!_JSON'] = json.dumps(data, sort_keys=True)
