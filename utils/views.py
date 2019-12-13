@@ -13,7 +13,7 @@ from django.views.decorators import csrf
 from django.core import mail
 from django.contrib.auth import decorators
 # Local
-from utils import utils
+from . import utils
 
 
 def _get_exif(filename):
