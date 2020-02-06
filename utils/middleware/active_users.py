@@ -21,6 +21,10 @@ class ActiveUserMiddleware:
 
     def update_user(self, request):
         user = request.user
-        if user.is_authenticated():
+        if isinstance(user.is_authenticated, bool):
+            authenticated = user.is_authenticated
+        else:
+            authenticated = user.is_authenticated()
+        if authenticated:
             user.last_active = timezone.now()
             user.save()
