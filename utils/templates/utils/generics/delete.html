@@ -1,12 +1,18 @@
 {% extends utils_settings.GENERICS.base_template %}
 
-{% block title %} - Delete {{ model_name|title }}{% endblock %}
+{% block title %} - {% if title %}{{ title }}{% else %}Delete {{ model_name|title }}{% endif %}{% endblock %}
 
 {% block content %}
 
-    <h1>
-        Delete {{ model_name|title }}
-    </h1>
+    <div class="page-header">
+        <h2>
+            {% if title %}
+                {{ title }}
+            {% else %}
+                Delete {{ model_name|title }}
+            {% endif %}
+        </h2>
+    </div>
 
     {% include 'utils/snippets/messages.html' %}
 

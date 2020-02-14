@@ -160,9 +160,16 @@
 
 {% block content %}
 
-    <h1>
-        {{ save_text|title }} {{ model_name|title }}
-    </h1>
+    <div class="page-header">
+        <h2>
+            {% if title %}
+                {{ title }}
+            {% else %}
+                {{ save_text|title }} {{ model_name|title }}
+            {% endif %}
+        </h2>
+    </div>
+
     {% include 'utils/snippets/messages.html' %}
 
     <form method="POST"

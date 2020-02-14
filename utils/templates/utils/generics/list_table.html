@@ -44,21 +44,21 @@
                                 </style>
                                 <td style="width: 91px;"><!-- from computed when width < 91 -->
                                     {% if not disable_detail %}
-                                        <a href="{% url model_name|add:'_detail' field_value.value %}"
+                                        <a href="{% url app|add:model_name|add:'_detail' field_value.value %}"
                                                 class="btn btn-info crud">
                                             View
                                         </a>
                                         <br />
                                     {% endif %}
                                     {% if not disable_update %}
-                                        <a href="{% url model_name|add:'_update' field_value.value %}"
+                                        <a href="{% url app|add:model_name|add:'_update' field_value.value %}"
                                                 class="btn btn-default crud">
                                             Update
                                         </a>
                                         <br />
                                     {% endif %}
                                     {% if not disable_delete %}
-                                        <a href="{% url model_name|add:'_delete' field_value.value %}"
+                                        <a href="{% url app|add:model_name|add:'_delete' field_value.value %}"
                                                 class="btn btn-danger crud">
                                             Delete
                                         </a>

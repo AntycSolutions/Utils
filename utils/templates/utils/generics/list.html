@@ -3,7 +3,7 @@
 {% load pipeline %}
 {% load fallback_tags %}
 
-{% block title %} - {{ model_name_plural|title }}{% endblock %}
+{% block title %} - {% if title %}{{ title }}{% else %}{{ model_name_plural|title }}{% endif %}{% endblock %}
 
 <script type="text/javascript">
     {% block fallback_load %}
@@ -58,7 +58,15 @@
 
 {% block content %}
 
-    <h1>{{ model_name_plural|title }}</h1>
+    <div class="page-header">
+        <h2>
+            {% if title %}
+                {{ title }}
+            {% else %}
+                {{ model_name_plural|title }}
+            {% endif %}
+        </h2>
+    </div>
 
     {% include 'utils/snippets/messages.html' %}
 

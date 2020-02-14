@@ -11,19 +11,22 @@ except ImportError:
 
 
 def get_git_info():
-    git_info = os.popen(
-        'cd "{}" &&'
-        ' git symbolic-ref --short HEAD &&'
-        ' git rev-parse HEAD'.format(settings.BASE_DIR)
-    ).read().replace('\n', ' ').strip().split(' ')
+    try:
+        git_info = os.popen(
+            'cd "{}" &&'
+            ' git symbolic-ref --short HEAD &&'
+            ' git rev-parse HEAD'.format(settings.BASE_DIR)
+        ).read().replace('\n', ' ').strip().split(' ')
+    except OSError as e:
+        return 'git failed {}'.format(e)
 
     if len(git_info) < 2 or not git_info[0] or not git_info[1]:
-        return 'Invalid git info', str(git_info)
+        return 'Invalid git info {}'.format(git_info)
 
     branch = git_info[0]
     commit_hash = git_info[1]
 
-    return branch, commit_hash
+    return '{} - {}'.format(branch, commit_hash)
 
 
 def send_mail(subject, body, html_message=None, emails=None):

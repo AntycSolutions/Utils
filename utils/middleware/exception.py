@@ -42,9 +42,7 @@ class ExceptionUserInfoMiddleware(deprecation.MiddlewareMixin):
             if full_name:
                 request.META['!!_USER_FULL_NAME'] = full_name
 
-        branch, commit_hash = utils.get_git_info()
-        request.META['!!_GIT_BRANCH'] = branch
-        request.META['!!_GIT_COMMIT'] = commit_hash
+        request.META['!!_GIT'] = utils.get_git_info()
 
         request.META['!!_PY'] = sys.version
 
@@ -54,19 +52,11 @@ class ExceptionUserInfoMiddleware(deprecation.MiddlewareMixin):
             content_type = request.META.get('CONTENT_TYPE')
         if request.is_ajax() or 'json' in content_type:
             try:
-                body = request.body.decode()
-            except http.request.UnreadablePostError:
-                request.META['!!_ERROR'] = 'UnreadablePostError'
+                event = json.loads(request.body.decode())
+            except Exception as e:
+                request.META['!!_ERROR'] = e
                 return
-            if not body:
-                request.META['!!_ERROR'] = 'no body'
-                return
-            try:
-                data = json.loads(body)
-            except json.JSONDecodeError:
-                request.META['!!_ERROR'] = 'JSONDecodeError'
-                return
-            if not data:
+            if not event:
                 request.META['!!_ERROR'] = 'no json'
                 return
-            request.META['!!_JSON'] = json.dumps(data, sort_keys=True)
+            request.META['!!_JSON'] = json.dumps(event, sort_keys=True)

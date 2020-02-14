@@ -3,13 +3,19 @@
 {% load field_utils %}
 {% load verbose_name %}
 
-{% block title %} - {{ model_name|title }}{% endblock %}
+{% block title %} - {% if title %}{{ title }}{% else %}{{ model_name|title }}{% endif %}{% endblock %}
 
 {% block content %}
 
-    <h1>
-        {{ model_name|title }}
-    </h1>
+    <div class="page-header">
+        <h2>
+            {% if title %}
+                {{ title }}
+            {% else %}
+                {{ model_name|title }}
+            {% endif %}
+        </h2>
+    </div>
 
     {% include 'utils/snippets/messages.html' %}
 
@@ -29,19 +35,21 @@
                 Information
             </div>
             <div class="btn-group pull-right">
-                <a href="{% url model_name.split|join:'_'|add:'_update' object.pk %}" class="btn btn-default">
-                    Update
-                </a>
-                <a href="{% url model_name.split|join:'_'|add:'_delete' object.pk %}" class="btn btn-danger">
-                    Delete
-                </a>
+                {% with model_name.split|join:'_' as model %}
+                    <a href="{% url app|add:model|add:'_update' object.pk %}" class="btn btn-default">
+                        Update
+                    </a>
+                    <a href="{% url app|add:model|add:'_delete' object.pk %}" class="btn btn-danger">
+                        Delete
+                    </a>
+                {% endwith %}
             </div>
         </div>
         <div class="panel-body">
             <div class="col-lg-6">
                 <div class="form-horizontal">
                     {% for name, field_value in object.get_all_fields.items %}
-                        {% if name == 'id' %}
+                        {% if name == 'id' or name in hidden_fields %}
                             {# Skip ID #}
                         {% elif field_value.field|is_image %}
                             <div class="form-group">
