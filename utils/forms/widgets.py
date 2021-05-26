@@ -6,8 +6,20 @@ from django.utils import safestring
 
 # supports multiple file upload on one widget
 class MultiFileInput(widgets.FileInput):
-    def render(self, name, value, attrs=None):
+    def _set_multiple(self, attrs):
+        attrs = attrs or {}
         attrs['multiple'] = 'multiple'
+
+        return attrs
+
+    def __init__(self, attrs=None):
+        attrs = self._set_multiple(attrs)
+
+        super().__init__(attrs)
+
+    # django < 1.11
+    def render(self, name, value, attrs=None):
+        attrs = self._set_multiple(attrs)
 
         return super().render(name, value, attrs)
 
@@ -52,7 +64,7 @@ class ClearableFile(widgets.ClearableFileInput):
 
         return upload
 
-    def render(self, widget_name, value, attrs=None):
+    def _render_template(self, widget_name, value):
         substitutions = {
             'initial_text': self.initial_text,
             'input_text': self.input_text,
@@ -108,6 +120,36 @@ class ClearableFile(widgets.ClearableFileInput):
 
         return output
 
+    def _render(self, template_name, context, renderer=None):
+        if not hasattr(self, 'template_with_clear'):
+            self.template_with_clear = (
+                '%(clear)s <label for="%(clear_checkbox_id)s">'
+                '%(clear_checkbox_label)s</label>'
+            )
+
+        if not hasattr(self, 'get_template_substitution_values'):
+            def get_template_substitution_values(value):
+                return {
+                    'initial': conditional_escape(value),
+                    'initial_url': conditional_escape(value.url),
+                }
+
+            self.get_template_substitution_values = (
+                get_template_substitution_values
+            )
+
+        rendered = self._render_template(
+            context['widget']['name'], context['widget']['value']
+        )
+
+        return rendered
+
+    # django < 1.11
+    def render(self, widget_name, value, attrs=None):
+        output = self._render_template(widget_name, value)
+
+        return output
+
 
 class MissingFormIdException(Exception):
     pass
@@ -154,9 +196,7 @@ class ConfirmClearableFileBase:
 
         super().__init__(*args, **kwargs)
 
-    def render(self, widget_name, value, attrs=None):
-        html = super().render(widget_name, value, attrs)
-
+    def _render_script(self, widget_name, html):
         if hasattr(self, 'field_name'):
             # ConfirmClearableFile/ConfirmClearableMultiFileMultiWidget
             field_name = self.field_name
@@ -174,6 +214,21 @@ class ConfirmClearableFileBase:
                 'file_name': file_name
             }
         # else:  # empty file field
+
+        return html
+
+    def _render(self, template_name, context, renderer=None):
+        rendered = super()._render(template_name, context, renderer)
+
+        self._render_script(context['widget']['name'], rendered)
+
+        return rendered
+
+    # django < 1.11
+    def render(self, widget_name, value, attrs=None):
+        html = super().render(widget_name, value, attrs)
+
+        html = self._render_script(widget_name, html)
 
         return safestring.mark_safe(html)
 
@@ -228,6 +283,18 @@ class ConfirmClearableMultiFileMultiWidget(widgets.MultiWidget):
         output += rendered_widgets[-1]  # MultiFileInput
 
         return output
+
+    def _render(self, template_name, context, renderer=None):
+        rendered_widgets = []
+        for widget, subwidget_context in zip(
+            self.widgets, context['widget']['subwidgets']
+        ):
+            rendered_widgets.append(widget._render(
+                widget.template_name, {'widget': subwidget_context}, renderer
+            ))
+        output = self.format_output(rendered_widgets)
+
+        return safestring.mark_safe(output)
 
     def decompress(self, value):
         if not value:
