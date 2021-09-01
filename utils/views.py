@@ -304,8 +304,6 @@ def js_reporter(request):
 
 
 def ver(request):
-    branch, commit_hash = utils.get_git_info()
+    git = utils.get_git_info()
 
-    return http.JsonResponse({
-        'branch': branch, 'commit': commit_hash, 'py': sys.version
-    })
+    return http.JsonResponse({'git': git, 'py': sys.version})
