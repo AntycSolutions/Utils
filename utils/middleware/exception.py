@@ -2,7 +2,6 @@
 import sys
 import json
 # 3rd Party
-from django import http
 from django.utils import deprecation
 # Local
 from utils import utils
