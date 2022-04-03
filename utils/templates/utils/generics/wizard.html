@@ -20,7 +20,12 @@
         {% endwith %}
 
         {% for js in wizard.form.media|get_attr:"_js" %}
-            'media_{{ forloop.counter0 }}_js': "{% static js %}",
+            {% if js.key %}
+                '{{ js.key }}':
+            {% else %}
+                'media_{{ forloop.counter0 }}_js':
+            {% endif %}
+                    "{% static js %}",
         {% endfor %}
     {% endblock %}
 </script>
@@ -39,12 +44,16 @@
         {% endwith %}
 
         {% for js in wizard.form.media|get_attr:"_js" %}
-            'media_{{ forloop.counter0 }}_js':
-                {% if js.shim %}
-                    ['{{ js.shim|safeseq|join:", " }}'],
-                {% else %}
-                    ['jQuery.fn.modal'],
-                {% endif %}
+            {% if js.key %}
+                '{{ js.key }}':
+            {% else %}
+                'media_{{ forloop.counter0 }}_js':
+            {% endif %}
+                    {% if js.shim %}
+                        ['{{ js.shim|safeseq|join:"', '" }}'],
+                    {% else %}
+                        ['jQuery.fn.modal'],
+                    {% endif %}
         {% endfor %}
     {% endblock %}
 </script>

@@ -24,10 +24,12 @@ def as_span(self):
 # that supports specifying shim dependencies for fallbackjs
 class MediaStr(str):
     def __new__(cls, *args, **kwargs):
+        key = kwargs.pop('key', None)
         shim = kwargs.pop('shim', None)
 
         instance = super().__new__(cls, *args, **kwargs)
 
+        instance.key = key
         instance.shim = shim
 
         return instance
