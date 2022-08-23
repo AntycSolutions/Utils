@@ -266,9 +266,14 @@ def server_error(request, template_name='500.html'):
             '<h1>Server Error (500)</h1>', content_type='text/html'
         )
 
-    return http.HttpResponseServerError(
-        _template.render(template.RequestContext(request))
-    )
+    try:
+        return http.HttpResponseServerError(
+            _template.render(template.RequestContext(request))
+        )
+    except Exception:
+        return http.HttpResponseServerError(
+            _template.render(template.RequestContext(request).flatten())
+        )
 
 
 @decorators.login_required
