@@ -272,7 +272,10 @@ def server_error(request, template_name='500.html'):
         )
     except Exception:
         return http.HttpResponseServerError(
-            _template.render(template.RequestContext(request).flatten())
+            _template.render(
+                context=template.RequestContext(request).flatten(),
+                request=request,
+            )
         )
 
 
