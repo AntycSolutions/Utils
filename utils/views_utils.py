@@ -4,6 +4,7 @@ from django.core import paginator
 
 from utils import models
 from utils.conf import settings
+from utils.forms import form_utils
 
 
 def _get_paginate_by(request, rows_per_page_var, context=None):
@@ -134,3 +135,40 @@ class AjaxResponseMixin:
             return http.JsonResponse(data)
         else:
             return response
+
+
+class DeduplicatedQuerySetBaseViewMixin:
+    '''Deduplicate querysets for forms and formsets base view mixin.'''
+    field_querysets = None
+    include_default_field_querysets = True
+
+    def get_include_default_field_querysets(self):
+        '''Get include default field querysets flag.'''
+        return self.include_default_field_querysets
+
+    def get_field_querysets(self):
+        '''Get field name to queryset dict.'''
+        return self.field_querysets
+
+
+class DeduplicatedQuerySetViewMixin(DeduplicatedQuerySetBaseViewMixin):
+    '''Deduplicate querysets for view forms.
+
+    Define field_querysets/get_field_querysets to set custom querysets per
+    field.
+    Define include_default_field_querysets/get_include_default_field_querysets
+    to not include default field querysets for instances of ModelChoiceField.
+    '''
+
+    # for CreateView/UpdateView or similar CBV's
+    def get_form_class(self):
+        '''Override get_form_class and replace the class with ours.'''
+        form_class = super().get_form_class()
+        deduplicated_form_class = form_utils.deduplicate_class(
+            form_class,
+            field_querysets=self.get_field_querysets(),
+            include_default_field_querysets=(
+                self.get_include_default_field_querysets()
+            ),
+        )
+        return deduplicated_form_class

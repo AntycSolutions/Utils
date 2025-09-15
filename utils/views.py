@@ -164,8 +164,23 @@ class FormsetUpdateView(edit.UpdateView):
         return form_class
 
 
-class InlineFormSetCreateView(edit.CreateView):
+class InlineFormSetViewBaseView:
+    '''Inline formset view mixin.'''
+
+    def get_inline_formset(self):
+        '''Get inline formset instance.'''
+        msg = "Subclasses must implement get_inline_formset()"
+        raise NotImplementedError(msg)
+
+
+class InlineFormSetCreateView(InlineFormSetViewBaseView, edit.CreateView):
+    '''Inline formset create view.
+
+    Define get_inline_formset to set inline formset instance.
+    '''
+
     def get(self, request, *args, **kwargs):
+        '''Override get to add formset.'''
         self.object = None
         form = self.get_form()
         formset = self.get_inline_formset()
@@ -175,6 +190,7 @@ class InlineFormSetCreateView(edit.CreateView):
         )
 
     def post(self, request, *args, **kwargs):
+        '''Override post to add formset.'''
         self.object = None
         form = self.get_form()
         formset = self.get_inline_formset(
@@ -187,6 +203,7 @@ class InlineFormSetCreateView(edit.CreateView):
             return self.form_invalid(form, formset)
 
     def form_valid(self, form, formset):
+        '''Override form_valid to add formset.'''
         self.object = form.save()
         formset.instance = self.object
         formset.save()
@@ -194,13 +211,20 @@ class InlineFormSetCreateView(edit.CreateView):
         return http.HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form, formset):
+        '''Override form_invalid to add formset.'''
         return self.render_to_response(
             self.get_context_data(form=form, formset=formset)
         )
 
 
-class InlineFormSetUpdateView(edit.UpdateView):
+class InlineFormSetUpdateView(InlineFormSetViewBaseView, edit.UpdateView):
+    '''Inline formset update view.
+
+    Define get_inline_formset to set inline formset instance.
+    '''
+
     def get(self, request, *args, **kwargs):
+        '''Override get to add formset.'''
         self.object = self.get_object()
         form = self.get_form()
         formset = self.get_inline_formset(instance=self.object)
@@ -210,6 +234,7 @@ class InlineFormSetUpdateView(edit.UpdateView):
         )
 
     def post(self, request, *args, **kwargs):
+        '''Override post to add formset.'''
         self.object = self.get_object()
         form = self.get_form()
         formset = self.get_inline_formset(
@@ -222,12 +247,14 @@ class InlineFormSetUpdateView(edit.UpdateView):
             return self.form_invalid(form, formset)
 
     def form_valid(self, form, formset):
+        '''Override form_valid to add formset.'''
         self.object = form.save()
         formset.save()
 
         return http.HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form, formset):
+        '''Override form_invalid to add formset.'''
         return self.render_to_response(
             self.get_context_data(form=form, formset=formset)
         )

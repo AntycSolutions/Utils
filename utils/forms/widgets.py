@@ -97,10 +97,10 @@ class ClearableFile(widgets.ClearableFileInput):
                 substitutions['initial_text'] = 'Pending'
 
             # don't display change and browse for files button
-            template = (
-                '%(initial_text)s: <a href="%(initial_url)s">%(initial)s</a> '
-                '%(clear_template)s<br />'
-            )
+            template = '''
+                %(initial_text)s: <a href="%(initial_url)s">%(initial)s</a>
+                %(clear_template)s
+            '''
             # set initial/initial_url
             substitutions.update(self.get_template_substitution_values(value))
             if not self.is_required:
@@ -121,12 +121,17 @@ class ClearableFile(widgets.ClearableFileInput):
         return output
 
     def _render(self, template_name, context, renderer=None):
+        # django >= 1.11
         if not hasattr(self, 'template_with_clear'):
-            self.template_with_clear = (
-                '%(clear)s <label for="%(clear_checkbox_id)s">'
-                '%(clear_checkbox_label)s</label>'
-            )
+            self.template_with_clear = '''
+                <div class="checkbox">
+                    <label for="%(clear_checkbox_id)s">
+                        %(clear)s %(clear_checkbox_label)s
+                    </label>
+                </div>
+            '''
 
+        # django >= 1.11
         if not hasattr(self, 'get_template_substitution_values'):
             def get_template_substitution_values(value):
                 return {
@@ -162,9 +167,10 @@ class MissingFormInstanceException(Exception):
 # add confirmation to clearing files via js
 class ConfirmClearableFileBase:
     script = '''
-        <script type="text/javascript">
+        <script>
             document.getElementById("%(form_id)s").addEventListener(
-                "submit", function(event) {
+                "submit",
+                function(event) {
                     var clear = document.getElementById("%(clear_id)s");
                     if (clear.checked) {
                         var c = confirm(
@@ -269,7 +275,7 @@ class ConfirmClearableMultiFileMultiWidget(widgets.MultiWidget):
         super().__init__(widgets, attrs)
 
     def format_output(self, rendered_widgets):
-        output = "Current Number of Files: {0}<br />".format(
+        output = "Current number of files: {0}<br>".format(
             len(rendered_widgets) - 1  # Last widget is the MultiFileInput
         )
         # ignore last widget as it is the MultiFileInput
