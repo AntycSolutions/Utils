@@ -194,10 +194,10 @@ class InlineFormSetCreateView(InlineFormSetViewBaseView, edit.CreateView):
         self.object = None
         form = self.get_form()
         formset = self.get_inline_formset(
-            self.request.POST, self.request.FILES
+            self.request.POST, self.request.FILES, instance=form.instance
         )
 
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid() & formset.is_valid():
             return self.form_valid(form, formset)
         else:
             return self.form_invalid(form, formset)
@@ -241,7 +241,7 @@ class InlineFormSetUpdateView(InlineFormSetViewBaseView, edit.UpdateView):
             self.request.POST, self.request.FILES, instance=self.object
         )
 
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid() & formset.is_valid():
             return self.form_valid(form, formset)
         else:
             return self.form_invalid(form, formset)

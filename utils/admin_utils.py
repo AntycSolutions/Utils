@@ -18,7 +18,7 @@ class DeduplicatedQuerySetAdminMixin(
 
     # for ModelAdmin or similar
     def get_form(self, *args, **kwargs):
-        '''Override get_form and replace the class with ours.'''
+        '''Get the form with deduplicate queryset mixin injected.'''
         form_class = super().get_form(*args, **kwargs)
         deduplicated_form_class = form_utils.deduplicate_class(
             form_class,
@@ -31,7 +31,7 @@ class DeduplicatedQuerySetAdminMixin(
 
     # for TabularInline/StackedInline or similar
     def get_formset(self, *args, **kwargs):
-        '''Override get_formset and replace the class with ours.'''
+        '''Get the formset with deduplicate queryset mixin injected.'''
         formset_class = super().get_formset(*args, **kwargs)
         deduplicated_formset_class = form_utils.deduplicate_class(
             formset_class,

@@ -48,6 +48,7 @@ class ImproperlyConfigured(Exception):
 
 
 def _check_field(form, field, field_name):
+    '''Ensure field is ModelChoiceField.'''
     if not isinstance(field, forms_models.ModelChoiceField):
         msg = '{} on {} is not an instance of ModelChoiceField'.format(
             field_name, form.__class__.__name__
@@ -66,18 +67,29 @@ def set_to_python(field, queryset):
 
     # closure to pass queryset to field's to_python
     def to_python(self, value):
+        '''Return py value from choices or queryset given html value.'''
         if value in self.empty_values:
             return None
         key = self.to_field_name or 'pk'
+        choices = self.choices
         try:
-            # generator stops iterating on first matching object
+            # generator stops iterating on first matching object due to next
             value = next(
-                object_
-                for object_ in queryset
-                # ids/pks are sent as strs
-                if str(getattr(object_, key)) == value
+                (  # not HiddenInput, set in set_field_choices
+                    choice[1]  # object
+                    for choice in choices  # choices includes initial
+                    # ids/pks are sent as strs
+                    if str(choice[0]) == value  # pk
+                )
+                if isinstance(choices, list)  # ChoiceField sets as list
+                else (  # HiddenInput
+                    object_
+                    for object_ in queryset
+                    # ids/pks are sent as strs
+                    if str(getattr(object_, key)) == value
+                )
             )
-        except StopIteration:
+        except StopIteration:  # no matching object
             raise exceptions.ValidationError(
                 self.error_messages['invalid_choice'], code='invalid_choice'
             )
@@ -246,6 +258,7 @@ class DeduplicatedQuerySetFormSetMixin(DeduplicatedQuerySetBaseFormMixin):
 
 
 def _check_mro(class_, class_name):
+    '''Ensure we are not deduplicating a deduplicated form.'''
     if DeduplicatedQuerySetBaseFormMixin in class_.__mro__:
         msg = (
             'Cannot deduplicate an already deduplicated form or formset: {}.'
@@ -254,6 +267,7 @@ def _check_mro(class_, class_name):
 
 
 def _check_kwargs(object_, kwargs):
+    '''Ensure deduplicate_class passes in kwargs.'''
     for field in ['field_querysets', 'include_default_field_querysets']:
         if field in kwargs:
             msg = (
@@ -290,6 +304,7 @@ def deduplicate_class(
 
     # closure to pass our args/kwargs to created class' init args/kwargs
     def __init__(self, *args, **kwargs):
+        '''Initialize class with required kwargs.'''
         _check_kwargs(self, kwargs)
         # super arguments required as method defined outside of class
         super(type(self), self).__init__(

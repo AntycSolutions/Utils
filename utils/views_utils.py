@@ -162,7 +162,7 @@ class DeduplicatedQuerySetViewMixin(DeduplicatedQuerySetBaseViewMixin):
 
     # for CreateView/UpdateView or similar CBV's
     def get_form_class(self):
-        '''Override get_form_class and replace the class with ours.'''
+        '''Get the form class with deduplicate queryset mixin injected.'''
         form_class = super().get_form_class()
         deduplicated_form_class = form_utils.deduplicate_class(
             form_class,
