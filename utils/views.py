@@ -308,32 +308,38 @@ def server_error(request, template_name='500.html'):
 
 @decorators.login_required
 def js_reporter(request):
-    if request.method == 'POST':
-        url = request.POST.get('url', '')
-        _json = request.POST.get('json', '{}')
-        response = request.POST.get('response', '')
+    if request.method != 'POST' or settings.DEBUG:
+        return http.JsonResponse({})
 
-        if url or _json or response:
-            pretty_json = json.dumps(json.loads(_json), indent=4)
-            # preserve spaces and newlines
-            pretty_html_json = " &nbsp;".join(
-                pretty_json.replace('\n', '<br>').split('  ')
+    url = request.POST.get('url') or ''
+    _json = request.POST.get('json') or ''
+    response = request.POST.get('response') or ''
+
+    if not any(url, _json, response):
+        return http.JsonResponse({})
+
+    pretty_json = pretty_html_json = ''
+    if _json:
+        pretty_json = json.dumps(json.loads(_json), indent=4)
+        # preserve spaces and newlines
+        pretty_html_json = " &nbsp;".join(
+            pretty_json.replace('\n', '<br>').split('  ')
+        )
+    mail.mail_admins(
+        'JS Issue',
+        'url: {}\n\njson:\n\n{}\n\nresponse:\n\n{}\n\n'.format(
+            url, pretty_json, response
+        ),
+        html_message=(
+            'url: {}<br><br>'
+            'json:<br><br><code>{}</code><br><br>'
+            'response:<br><br>{}<br><br>'.format(
+                url,
+                pretty_html_json,
+                response.replace('\n', '<br>')
             )
-            mail.mail_admins(
-                'JS Issue',
-                'url: {}\n\njson:\n\n{}\n\nresponse:\n\n{}\n\n'.format(
-                    url, pretty_json, response
-                ),
-                html_message=(
-                    'url: {}<br><br>'
-                    'json:<br><br><code>{}</code><br><br>'
-                    'response:<br><br>{}<br><br>'.format(
-                        url,
-                        pretty_html_json,
-                        response.replace('\n', '<br>')
-                    )
-                )
-            )
+        )
+    )
 
     return http.JsonResponse({})
 

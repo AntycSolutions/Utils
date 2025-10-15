@@ -56,7 +56,7 @@ def _check_field(form, field, field_name):
         raise ImproperlyConfigured(msg)
 
 
-def set_to_python(field, queryset):
+def set_to_python(field, queryset, initial_object):
     '''Override field's to_python.
 
     By overriding to_python further hits on the db are avoided.
@@ -65,69 +65,129 @@ def set_to_python(field, queryset):
     is sufficient.
     '''
 
-    # closure to pass queryset to field's to_python
+    # closure to pass queryset/initial_object to field's to_python
     def to_python(self, value):
-        '''Return py value from choices or queryset given html value.'''
+        '''Get py value from given html value.'''
         if value in self.empty_values:
             return None
+
         key = self.to_field_name or 'pk'
-        choices = self.choices
+
+        if (
+            initial_object is not None
+            and str(getattr(initial_object, key)) == value
+        ):
+            return initial_object
+
         try:
             # generator stops iterating on first matching object due to next
             value = next(
-                (  # not HiddenInput, set in set_field_choices
-                    choice[1]  # object
-                    for choice in choices  # choices includes initial
-                    # ids/pks are sent as strs
-                    if str(choice[0]) == value  # pk
-                )
-                if isinstance(choices, list)  # ChoiceField sets as list
-                else (  # HiddenInput
-                    object_
-                    for object_ in queryset
-                    # ids/pks are sent as strs
-                    if str(getattr(object_, key)) == value
-                )
+                default_object
+                for default_object in queryset
+                # ids/pks are sent as strs
+                if str(getattr(default_object, key)) == value
             )
         except StopIteration:  # no matching object
             raise exceptions.ValidationError(
                 self.error_messages['invalid_choice'], code='invalid_choice'
             )
+
         return value
 
     # set to_python as boundmethod on field
     field.to_python = to_python.__get__(field)
 
 
+def _get_nested_value(object_, key):
+    '''Get nested value from object via key.'''
+    *related_model_fields, field = key.split('__')
+    nested_object = object_
+    # use hasattr in case of non-null/non-blank relations
+    for related_model_field in related_model_fields:
+        if not hasattr(nested_object, related_model_field):
+            return None
+
+        nested_object = getattr(nested_object, related_model_field)
+
+    return (
+        getattr(nested_object, field)
+        if hasattr(nested_object, field)
+        else None
+    )
+
+
 def set_field_choices(form, field_name, queryset):
     '''Set field's choices to queryset results.
 
     By setting choices further hits on the db are avoided.
+
+    Queries to validate in model's full_clean are not affected.
     '''
     field = form.fields[field_name]
-
     _check_field(form, field, field_name)
 
-    set_to_python(field, queryset)
+    if form.instance._meta.pk.name == field_name:
+        initial_object = form.instance
+    else:
+        # use hasattr in case of non-null/non-blank relations
+        initial_object = (
+            getattr(form.instance, field_name)
+            if hasattr(form.instance, field_name)
+            else None
+        )
+
+    set_to_python(field, queryset, initial_object)
 
     if isinstance(field.widget, widgets.HiddenInput):
         return  # HiddenInputs do not use choices
 
-    pk = form.initial.get(field_name)
-    choices = tuple(
-        {
-            **(
-                {"": field.empty_label}
-                if field.empty_label is not None
-                else {}
-            ),  # empty value, empty_label set in ModelChoiceField init
-            **(
-                {pk: getattr(form.instance, field_name)}  # __str__
-                if pk is not None
-                else {}
-            ),  # initial object
-            **{object_.pk: object_ for object_ in queryset},  # default objects
-        }.items()
+    empty_choice = (
+        (("", field.empty_label),) if field.empty_label is not None else ()
+    )  # empty_label set in ModelChoiceField init
+
+    if initial_object is None:
+        initial_value = None
+        is_initial_object_in_queryset = True
+    else:
+        initial_value = field.prepare_value(initial_object)  # defaults to pk
+        is_initial_object_in_queryset = False
+
+    default_choices = []
+
+    for default_object in queryset:  # preserves queryset order
+        default_value = field.prepare_value(default_object)  # defaults to pk
+        default_choice = default_value, default_object
+        default_choices.append(default_choice)
+        is_initial_object_in_queryset = (
+            is_initial_object_in_queryset or default_value == initial_value
+        )
+
+    if not is_initial_object_in_queryset:
+        initial_choice = initial_value, initial_object
+        # add to end for unordered querysets
+        default_choices.append(initial_choice)
+        order = queryset.query.order_by or queryset.model._meta.ordering
+        is_ordered_and_is_not_random = (
+            order and all(order != '?' for order in order)
+        )
+        if is_ordered_and_is_not_random:
+            for order in order:  # preserve order after adding initial choice
+                # use chained sorts to support ascending/descending via reverse
+                default_choices.sort(
+                    key=lambda choice: _get_nested_value(choice[1], order),
+                    # leading '-' implies descending, use reverse
+                    reverse=order[0] == '-'
+                )
+
+    choices = (
+        *empty_choice,
+        *(
+            (
+                choice[0],
+                field.label_from_instance(choice[1]),  # defaults to str call
+            )
+            for choice in default_choices
+        ),
     )
     field.choices = choices
 
