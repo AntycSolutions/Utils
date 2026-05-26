@@ -315,7 +315,7 @@ def js_reporter(request):
     _json = request.POST.get('json') or ''
     response = request.POST.get('response') or ''
 
-    if not any(url, _json, response):
+    if not any([url, _json, response]):
         return http.JsonResponse({})
 
     pretty_json = pretty_html_json = ''
