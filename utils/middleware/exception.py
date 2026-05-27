@@ -45,10 +45,11 @@ class ExceptionUserInfoMiddleware(deprecation.MiddlewareMixin):
 
         request.META['!!_PY'] = sys.version
 
-        if hasattr(request, 'content_type'):
-            content_type = request.content_type
-        else:
-            content_type = request.META.get('CONTENT_TYPE')
+        content_type = (
+            request.content_type
+            if hasattr(request, 'content_type')
+            else request.META.get('CONTENT_TYPE')
+        ) or ""
         if request.is_ajax() or 'json' in content_type:
             try:
                 event = json.loads(request.body.decode())
